@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการผู้ใช้ - CPS</title>
+    <link rel="stylesheet" href="./lib/compiled/css/app.css">
+    <link rel="stylesheet" href="./lib/compiled/css/app-dark.css">
+    <link rel="stylesheet" href="./lib/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="./lib/extensions/sweetalert2/sweetalert2.min.css">
+</head>
+
+<body>
+    <div id="app">
+        <?php include 'views/layouts/navbar-mazer.php'; ?>
+
+        <div class="container-fluid mt-3">
+            <div class="page-heading">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3>จัดการผู้ใช้</h3>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                        <i class="fas fa-plus"></i> เพิ่มผู้ใช้ใหม่
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div class="card">
+                    <div class="card-body">
+                        <?php if (isset($_GET['success'])): ?>
+                            <div class="alert alert-success">เพิ่มผู้ใช้สำเร็จ</div>
+                        <?php endif; ?>
+                        <?php if (isset($_GET['updated'])): ?>
+                            <div class="alert alert-success">แก้ไขผู้ใช้สำเร็จ</div>
+                        <?php endif; ?>
+                        <?php if (isset($_GET['deleted'])): ?>
+                            <div class="alert alert-success">ลบผู้ใช้สำเร็จ</div>
+                        <?php endif; ?>
+                        <?php if (isset($_GET['error'])): ?>
+                            <div class="alert alert-danger">เกิดข้อผิดพลาด</div>
+                        <?php endif; ?>
+
+                        <?php
+                        $table = ServerSideTable::create(
+                            $users, 
+                            $currentPage, 
+                            $perPage, 
+                            $totalRecords
+                        )
+                            ->addColumn('id', 'ID')
+                            ->addColumn('username', 'ชื่อผู้ใช้')
+                            ->addColumn('full_name', 'ชื่อเต็ม')
+                            ->addColumn('email', 'อีเมล')
+                            ->addColumn('role_names', 'บทบาท')
+                            ->addColumn('is_active', 'สถานะ', function($value) {
+                                return $value ? '<span class="badge bg-success">เปิดใช้งาน</span>' : '<span class="badge bg-danger">ปิดใช้งาน</span>';
+                            })
+                            ->addAction('แก้ไข', 'javascript:editUser({id})', 'btn-warning', 'fas fa-edit')
+                            ->addAction('ลบ', 'javascript:deleteUser({id})', 'btn-danger', 'fas fa-trash');
+                        
+                        echo $table->render();
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Modal -->
+    <div class="modal fade" id="createModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">เพิ่มผู้ใช้ใหม่</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="createForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">ชื่อผู้ใช้</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ชื่อเต็ม</label>
+                            <input type="text" class="form-control" name="full_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">อีเมล</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">รหัสผ่าน</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">บทบาท</label>
+                            <div class="row">
+                                <?php foreach ($roles as $role): ?>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="<?= $role['id'] ?>" id="role_<?= $role['id'] ?>">
+                                            <label class="form-check-label" for="role_<?= $role['id'] ?>">
+                                                <?= htmlspecialchars($role['display_name']) ?>
+                                            </label>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary">บันทึก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">แก้ไขผู้ใช้</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editForm">
+                    <input type="hidden" name="id" id="edit_id">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">ชื่อผู้ใช้</label>
+                            <input type="text" class="form-control" name="username" id="edit_username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ชื่อเต็ม</label>
+                            <input type="text" class="form-control" name="full_name" id="edit_full_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">อีเมล</label>
+                            <input type="email" class="form-control" name="email" id="edit_email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">บทบาท</label>
+                            <div class="row" id="edit_roles">
+                                <?php foreach ($roles as $role): ?>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="<?= $role['id'] ?>" id="edit_role_<?= $role['id'] ?>">
+                                            <label class="form-check-label" for="edit_role_<?= $role['id'] ?>">
+                                                <?= htmlspecialchars($role['display_name']) ?>
+                                            </label>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="edit_is_active" value="1">
+                                <label class="form-check-label" for="edit_is_active">เปิดใช้งาน</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary">บันทึก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="lib/compiled/js/app.js"></script>
+    <script src="./lib/extensions/sweetalert2/sweetalert2.min.js"></script>
+    <script>
+    // Create User
+    document.getElementById('createForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        Swal.fire({
+            title: 'ยืนยันการบันทึก',
+            text: 'ต้องการบันทึกข้อมูลหรือไม่?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'บันทึก',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData(this);
+                
+                fetch('/cps/?url=users/store', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire('สำเร็จ!', 'บันทึกข้อมูลเรียบร้อย', 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('ผิดพลาด!', 'เกิดข้อผิดพลาด', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    // Edit User
+    function editUser(id) {
+        fetch('/cps/?url=users/get&id=' + id)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('edit_id').value = data.id;
+            document.getElementById('edit_username').value = data.username;
+            document.getElementById('edit_full_name').value = data.full_name;
+            document.getElementById('edit_email').value = data.email;
+            document.getElementById('edit_is_active').checked = data.is_active == 1;
+            
+            // Set selected roles
+            const roleCheckboxes = document.querySelectorAll('#edit_roles input[type="checkbox"]');
+            roleCheckboxes.forEach(checkbox => {
+                checkbox.checked = data.roles.includes(parseInt(checkbox.value));
+            });
+            
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+        });
+    }
+
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        Swal.fire({
+            title: 'ยืนยันการแก้ไข',
+            text: 'ต้องการบันทึกการแก้ไขหรือไม่?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'บันทึก',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData(this);
+                
+                fetch('/cps/?url=users/update', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire('สำเร็จ!', 'แก้ไขข้อมูลเรียบร้อย', 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('ผิดพลาด!', 'เกิดข้อผิดพลาด', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    // Delete User
+    function deleteUser(id) {
+        Swal.fire({
+            title: 'ยืนยันการลบ',
+            text: 'ต้องการลบผู้ใช้นี้หรือไม่? การดำเนินการนี้ไม่สามารถยกเลิกได้',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'ลบ',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/cps/?url=users/delete&id=' + id;
+            }
+        });
+    }
+    </script>
+</body>
+
+</html>
