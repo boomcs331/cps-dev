@@ -15,7 +15,7 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 
 // ตั้งค่า URL base
-define('BASE_URL', '/cps/');
+define('BASE_URL', '/cps-dev/');
 
 // ตั้งค่า path
 define('ROOT_PATH', __DIR__ . '/../');

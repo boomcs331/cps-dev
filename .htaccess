@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /cps/
+RewriteBase /cps-dev/
 
 # ถ้าไฟล์หรือโฟลเดอร์มีอยู่จริง ให้ใช้ไฟล์นั้น
 RewriteCond %{REQUEST_FILENAME} !-f
