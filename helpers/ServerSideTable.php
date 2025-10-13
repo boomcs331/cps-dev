@@ -16,7 +16,7 @@ class ServerSideTable {
         $this->currentPage = $currentPage;
         $this->perPage = $perPage;
         $this->totalRecords = $totalRecords;
-        $this->baseUrl = $_SERVER['REQUEST_URI'];
+    $this->baseUrl = defined('BASE_URL') ? BASE_URL : '/';
     }
     
     public function addColumn($key, $label) {
@@ -163,7 +163,7 @@ class ServerSideTable {
     private function getPageUrl($page) {
         $params = $_GET;
         $params['page'] = $page;
-        return '/cps/?' . http_build_query($params);
+    return (defined('BASE_URL') ? BASE_URL : '/') . '?' . http_build_query($params);
     }
     
     public static function create($data = [], $currentPage = 1, $perPage = 10, $totalRecords = 0) {

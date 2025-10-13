@@ -8,7 +8,7 @@ class PermissionController extends Controller {
         
         $permissionModel = $this->model('Permission');
         if (!$permissionModel->hasPermission($_SESSION['user_id'], 'permission.view')) {
-            header('Location: /cps/?url=dashboard');
+            header('Location: ' . BASE_URL . '?url=dashboard');
             exit;
         }
 
@@ -38,7 +38,7 @@ class PermissionController extends Controller {
         
         $permissionModel = $this->model('Permission');
         if (!$permissionModel->hasPermission($_SESSION['user_id'], 'permission.manage')) {
-            header('Location: /cps/?url=dashboard');
+            header('Location: ' . BASE_URL . '?url=dashboard');
             exit;
         }
 
@@ -54,7 +54,7 @@ class PermissionController extends Controller {
         
         $permissionModel = $this->model('Permission');
         if (!$permissionModel->hasPermission($_SESSION['user_id'], 'permission.manage')) {
-            header('Location: /cps/?url=dashboard');
+            header('Location: ' . BASE_URL . '?url=dashboard');
             exit;
         }
 
@@ -67,9 +67,9 @@ class PermissionController extends Controller {
             $result = $permissionModel->createPermission($name, $display_name, $description, $module);
 
             if ($result) {
-                header('Location: /cps/?url=permissions&success=1');
+                header('Location: ' . BASE_URL . '?url=permissions&success=1');
             } else {
-                header('Location: /cps/?url=permissions/create&error=1');
+                header('Location: ' . BASE_URL . '?url=permissions/create&error=1');
             }
             exit;
         }
@@ -80,7 +80,7 @@ class PermissionController extends Controller {
         
         $permissionModel = $this->model('Permission');
         if (!$permissionModel->hasPermission($_SESSION['user_id'], 'permission.manage')) {
-            header('Location: /cps/?url=dashboard');
+            header('Location: ' . BASE_URL . '?url=dashboard');
             exit;
         }
 
@@ -88,7 +88,7 @@ class PermissionController extends Controller {
         $permission = $permissionModel->getPermissionById($id);
 
         if (!$permission) {
-            header('Location: /cps/?url=permissions');
+            header('Location: ' . BASE_URL . '?url=permissions');
             exit;
         }
 
@@ -105,7 +105,7 @@ class PermissionController extends Controller {
         
         $permissionModel = $this->model('Permission');
         if (!$permissionModel->hasPermission($_SESSION['user_id'], 'permission.manage')) {
-            header('Location: /cps/?url=dashboard');
+            header('Location: ' . BASE_URL . '?url=dashboard');
             exit;
         }
 
@@ -119,9 +119,9 @@ class PermissionController extends Controller {
             $result = $permissionModel->updatePermission($id, $name, $display_name, $description, $module);
 
             if ($result) {
-                header('Location: /cps/?url=permissions&updated=1');
+                header('Location: ' . BASE_URL . '?url=permissions&updated=1');
             } else {
-                header('Location: /cps/?url=permissions/edit&id=' . $id . '&error=1');
+                header('Location: ' . BASE_URL . '?url=permissions/edit&id=' . $id . '&error=1');
             }
             exit;
         }
@@ -149,7 +149,7 @@ class PermissionController extends Controller {
         
         $permissionModel = $this->model('Permission');
         if (!$permissionModel->hasPermission($_SESSION['user_id'], 'permission.manage')) {
-            header('Location: /cps/?url=dashboard');
+            header('Location: ' . BASE_URL . '?url=dashboard');
             exit;
         }
 
@@ -157,9 +157,9 @@ class PermissionController extends Controller {
         $result = $permissionModel->deletePermission($id);
 
         if ($result) {
-            header('Location: /cps/?url=permissions&deleted=1');
+            header('Location: ' . BASE_URL . '?url=permissions&deleted=1');
         } else {
-            header('Location: /cps/?url=permissions&error=1');
+            header('Location: ' . BASE_URL . '?url=permissions&error=1');
         }
         exit;
     }

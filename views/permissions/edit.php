@@ -29,7 +29,7 @@
                                 <div class="alert alert-danger">เกิดข้อผิดพลาดในการแก้ไขสิทธิ์</div>
                                 <?php endif; ?>
 
-                                <form action="/cps/?url=permissions/update" method="POST">
+                                <form action="<?= BASE_URL ?>?url=permissions/update" method="POST">
                                     <input type="hidden" name="id" value="<?= $permission['id'] ?>">
                                     
                                     <div class="form-group">
@@ -65,7 +65,7 @@
                                         <button type="submit" class="btn btn-primary">
                                             <i class="fas fa-save"></i> บันทึก
                                         </button>
-                                        <a href="/cps/?url=permissions" class="btn btn-secondary">
+                                        <a href="<?= BASE_URL ?>?url=permissions" class="btn btn-secondary">
                                             <i class="fas fa-times"></i> ยกเลิก
                                         </a>
                                     </div>

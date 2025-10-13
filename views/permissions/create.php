@@ -31,7 +31,7 @@
                                     <div class="alert alert-danger">เกิดข้อผิดพลาดในการเพิ่มสิทธิ์</div>
                                 <?php endif; ?>
 
-                                <form action="/cps/?url=permissions/store" method="POST">
+                                <form action="<?= BASE_URL ?>?url=permissions/store" method="POST">
                                     <div class="form-group">
                                         <label for="name">ชื่อสิทธิ์ (Permission Name)</label>
                                         <input type="text" class="form-control" id="name" name="name"
@@ -68,7 +68,7 @@
                                         <button type="submit" class="btn btn-primary">
                                             <i class="fas fa-save"></i> บันทึก
                                         </button>
-                                        <a href="/cps/?url=permissions" class="btn btn-secondary">
+                                        <a href="<?= BASE_URL ?>?url=permissions" class="btn btn-secondary">
                                             <i class="fas fa-times"></i> ยกเลิก
                                         </a>
                                     </div>

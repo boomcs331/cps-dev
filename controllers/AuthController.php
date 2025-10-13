@@ -12,7 +12,7 @@ class AuthController extends Controller {
             
             // ตรวจสอบข้อมูล login (ตัวอย่างง่ายๆ)
             if ($this->authenticate($username, $password)) {
-                header('Location: /cps/?url=dashboard');
+                header('Location: ' . BASE_URL . '?url=dashboard');
                 exit;
             } else {
                 $error = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
@@ -21,7 +21,7 @@ class AuthController extends Controller {
         } else {
             // ถ้า login แล้วให้ redirect ไป dashboard
             if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
-                header('Location: /cps/?url=dashboard');
+                header('Location: ' . BASE_URL . '?url=dashboard');
                 exit;
             }
             
@@ -31,7 +31,7 @@ class AuthController extends Controller {
     
     public function logout() {
         session_destroy();
-        header('Location: /cps/?url=login');
+    header('Location: ' . BASE_URL . '?url=login');
         exit;
     }
     

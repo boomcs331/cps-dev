@@ -139,7 +139,7 @@
                             </div>
                             <?php if (in_array('user.view', $permissions)): ?>
                                 <div class="col-md-3 mb-3">
-                                    <a href="/cps/?url=users" class="menu-card">
+                                    <a href="<?= BASE_URL ?>?url=users" class="menu-card">
                                         <div class="card h-100">
                                             <div class="card-body text-center">
                                                 <i class="fas fa-users fa-2x text-primary mb-2"></i>
@@ -151,7 +151,7 @@
                             <?php endif; ?>
                             <?php if (in_array('role.view', $permissions)): ?>
                                 <div class="col-md-3 mb-3">
-                                    <a href="/cps/?url=roles" class="menu-card">
+                                    <a href="<?= BASE_URL ?>?url=roles" class="menu-card">
                                         <div class="card h-100">
                                             <div class="card-body text-center">
                                                 <i class="fas fa-user-tag fa-2x text-success mb-2"></i>
@@ -163,7 +163,7 @@
                             <?php endif; ?>
                             <?php if (in_array('permission.view', $permissions)): ?>
                                 <div class="col-md-3 mb-3">
-                                    <a href="/cps/?url=permissions" class="menu-card">
+                                    <a href="<?= BASE_URL ?>?url=permissions" class="menu-card">
                                         <div class="card h-100">
                                             <div class="card-body text-center">
                                                 <i class="fas fa-user-shield fa-2x text-info mb-2"></i>
@@ -185,8 +185,8 @@
                                     </div>
                                 </div>
                             <?php endif; ?>
-                            <div class="col-md-3 mb-3">
-                                <a href="/cps/?url=reports" class="menu-card">
+                                <div class="col-md-3 mb-3">
+                                    <a href="<?= BASE_URL ?>?url=reports" class="menu-card">
                                     <div class="card h-100">
                                         <div class="card-body text-center">
                                             <i class="fas fa-chart-bar fa-2x text-info mb-2"></i>
@@ -197,7 +197,7 @@
                             </div>
                             <?php if (in_array('system.admin', $permissions)): ?>
                                 <div class="col-md-3 mb-3">
-                                    <a href="/cps/?url=settings" class="menu-card">
+                                    <a href="<?= BASE_URL ?>?url=settings" class="menu-card">
                                         <div class="card h-100">
                                             <div class="card-body text-center">
                                                 <i class="fas fa-cogs fa-2x text-warning mb-2"></i>
@@ -209,7 +209,7 @@
                             <?php endif; ?>
                             <?php if (in_array('pc', $permissions)): ?>
                                 <div class="col-md-3 mb-3">
-                                    <a href="/cps/?url=pc" class="menu-card">
+                                    <a href="<?= BASE_URL ?>?url=pc" class="menu-card">
                                         <div class="card h-100">
                                             <div class="card-body text-center">
                                                 <i class="fas fa-wrench fa-2x text-secondary mb-2"></i>
@@ -530,7 +530,7 @@
 
             const formData = new FormData(this);
 
-            fetch('/cps/?url=users/create', {
+            fetch('<?= BASE_URL ?>?url=users/create', {
                     method: 'POST',
                     body: formData
                 })

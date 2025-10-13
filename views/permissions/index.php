@@ -177,7 +177,7 @@
                     formData.set('module', customModule.value);
                 }
                 
-                fetch('/cps/?url=permissions/store', {
+                fetch('<?= BASE_URL ?>?url=permissions/store', {
                     method: 'POST',
                     body: formData
                 })
@@ -196,7 +196,7 @@
 
     // Edit Permission
     function editPermission(id) {
-        fetch('/cps/?url=permissions/get&id=' + id)
+    fetch('<?= BASE_URL ?>?url=permissions/get&id=' + id)
         .then(response => response.json())
         .then(data => {
             document.getElementById('edit_id').value = data.id;
@@ -232,7 +232,7 @@
                     formData.set('module', customModule.value);
                 }
                 
-                fetch('/cps/?url=permissions/update', {
+                fetch('<?= BASE_URL ?>?url=permissions/update', {
                     method: 'POST',
                     body: formData
                 })
@@ -262,7 +262,7 @@
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = '/cps/?url=permissions/delete&id=' + id;
+                window.location.href = '<?= BASE_URL ?>?url=permissions/delete&id=' + id;
             }
         });
     }

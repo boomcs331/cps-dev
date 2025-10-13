@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แดชบอร์ด - CPS</title>
-    <link href="/cps/lib/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/cps/lib/fontawesome/css/all.min.css" rel="stylesheet">
-    <link href="/cps/lib/css/dashboard.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>lib/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>lib/fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>lib/css/dashboard.css" rel="stylesheet">
 </head>
 <body>
     <?php include 'views/layouts/navbar.php'; ?>
@@ -103,7 +103,7 @@
                     <div class="card-body text-center">
                         <i class="fas fa-users fa-2x text-primary mb-2"></i>
                         <h6>จัดการผู้ใช้</h6>
-                        <a href="/cps/?url=users" class="btn btn-primary btn-sm">เข้าใช้</a>
+                        <a href="<?= BASE_URL ?>?url=users" class="btn btn-primary btn-sm">เข้าใช้</a>
                     </div>
                 </div>
             </div>
@@ -114,7 +114,7 @@
                     <div class="card-body text-center">
                         <i class="fas fa-user-shield fa-2x text-success mb-2"></i>
                         <h6>จัดการสิทธิ์</h6>
-                        <a href="/cps/?url=roles" class="btn btn-success btn-sm">เข้าใช้</a>
+                        <a href="<?= BASE_URL ?>?url=roles" class="btn btn-success btn-sm">เข้าใช้</a>
                     </div>
                 </div>
             </div>
@@ -124,7 +124,7 @@
                     <div class="card-body text-center">
                         <i class="fas fa-chart-bar fa-2x text-info mb-2"></i>
                         <h6>รายงาน</h6>
-                        <a href="/cps/?url=reports" class="btn btn-info btn-sm">เข้าใช้</a>
+                        <a href="<?= BASE_URL ?>?url=reports" class="btn btn-info btn-sm">เข้าใช้</a>
                     </div>
                 </div>
             </div>
@@ -134,7 +134,7 @@
                     <div class="card-body text-center">
                         <i class="fas fa-cogs fa-2x text-warning mb-2"></i>
                         <h6>ตั้งค่าระบบ</h6>
-                        <a href="/cps/?url=settings" class="btn btn-warning btn-sm">เข้าใช้</a>
+                        <a href="<?= BASE_URL ?>?url=settings" class="btn btn-warning btn-sm">เข้าใช้</a>
                     </div>
                 </div>
             </div>
@@ -145,7 +145,7 @@
                     <div class="card-body text-center">
                         <i class="fas fa-key fa-2x text-secondary mb-2"></i>
                         <h6>จัดการสิทธิ์</h6>
-                        <a href="/cps/?url=permissions" class="btn btn-secondary btn-sm">เข้าใช้</a>
+                        <a href="<?= BASE_URL ?>?url=permissions" class="btn btn-secondary btn-sm">เข้าใช้</a>
                     </div>
                 </div>
             </div>
@@ -156,7 +156,7 @@
                     <div class="card-body text-center">
                         <i class="fas fa-database fa-2x text-success mb-2"></i>
                         <h6>สำรองข้อมูล</h6>
-                        <a href="/cps/?url=backup" class="btn btn-success btn-sm">เข้าใช้</a>
+                        <a href="<?= BASE_URL ?>?url=backup" class="btn btn-success btn-sm">เข้าใช้</a>
                     </div>
                 </div>
             </div>
@@ -167,7 +167,7 @@
                     <div class="card-body text-center">
                         <i class="fas fa-file-alt fa-2x text-dark mb-2"></i>
                         <h6>ล็อกระบบ</h6>
-                        <a href="/cps/?url=logs" class="btn btn-dark btn-sm">เข้าใช้</a>
+                        <a href="<?= BASE_URL ?>?url=logs" class="btn btn-dark btn-sm">เข้าใช้</a>
                     </div>
                 </div>
             </div>
@@ -191,6 +191,6 @@
         </div>
     </div>
 
-    <script src="/cps/lib/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= BASE_URL ?>lib/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -34,7 +34,7 @@ class UserController extends Controller {
                 echo json_encode(['success' => false, 'message' => 'ไม่มีสิทธิ์ในการเพิ่มผู้ใช้']);
                 exit;
             }
-            header('Location: /cps/?url=dashboard');
+            header('Location: ' . BASE_URL . '?url=dashboard');
             exit;
         }
         
@@ -78,7 +78,7 @@ class UserController extends Controller {
     public function edit($id) {
         // ตรวจสอบสิทธิ์
         if (!$this->checkPermission('user.edit')) {
-            header('Location: /cps/?url=dashboard');
+            header('Location: ' . BASE_URL . '?url=dashboard');
             exit;
         }
         
@@ -100,7 +100,7 @@ class UserController extends Controller {
                 $result = $userModel->updateUser($id, $username, $email, $full_name, $roles, $is_active);
                 if ($result) {
                     $_SESSION['success'] = 'แก้ไขข้อมูลผู้ใช้เรียบร้อยแล้ว';
-                    header('Location: /cps/?url=users');
+                    header('Location: ' . BASE_URL . '?url=users');
                     exit;
                 } else {
                     $errors[] = 'เกิดข้อผิดพลาดในการแก้ไขข้อมูล';
@@ -119,7 +119,7 @@ class UserController extends Controller {
         } else {
             $user = $userModel->getUserById($id);
             if (!$user) {
-                header('Location: /cps/?url=users');
+                header('Location: ' . BASE_URL . '?url=users');
                 exit;
             }
             
@@ -144,9 +144,9 @@ class UserController extends Controller {
             $userModel = $this->model('User');
             
             if ($userModel->createUser($username, $email, $password, $full_name, $roles)) {
-                header('Location: /cps/?url=users&success=1');
+                header('Location: ' . BASE_URL . '?url=users&success=1');
             } else {
-                header('Location: /cps/?url=users&error=1');
+                header('Location: ' . BASE_URL . '?url=users&error=1');
             }
             exit;
         }
@@ -178,9 +178,9 @@ class UserController extends Controller {
             $userModel = $this->model('User');
             
             if ($userModel->updateUser($id, $username, $email, $full_name, $roles, $is_active)) {
-                header('Location: /cps/?url=users&updated=1');
+                header('Location: ' . BASE_URL . '?url=users&updated=1');
             } else {
-                header('Location: /cps/?url=users&error=1');
+                header('Location: ' . BASE_URL . '?url=users&error=1');
             }
             exit;
         }
@@ -191,9 +191,9 @@ class UserController extends Controller {
             $userModel = $this->model('User');
             
             if ($userModel->deleteUser($_GET['id'])) {
-                header('Location: /cps/?url=users&deleted=1');
+                header('Location: ' . BASE_URL . '?url=users&deleted=1');
             } else {
-                header('Location: /cps/?url=users&error=1');
+                header('Location: ' . BASE_URL . '?url=users&error=1');
             }
             exit;
         }

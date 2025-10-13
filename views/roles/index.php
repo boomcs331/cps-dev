@@ -180,7 +180,7 @@
             if (result.isConfirmed) {
                 const formData = new FormData(this);
                 
-                fetch('/cps/?url=roles/store', {
+                fetch('<?= BASE_URL ?>?url=roles/store', {
                     method: 'POST',
                     body: formData
                 })
@@ -199,7 +199,7 @@
 
     // Edit Role
     function editRole(id) {
-        fetch('/cps/?url=roles/get&id=' + id)
+    fetch('<?= BASE_URL ?>?url=roles/get&id=' + id)
         .then(response => response.json())
         .then(data => {
             document.getElementById('edit_id').value = data.id;
@@ -228,7 +228,7 @@
             if (result.isConfirmed) {
                 const formData = new FormData(this);
                 
-                fetch('/cps/?url=roles/update', {
+                fetch('<?= BASE_URL ?>?url=roles/update', {
                     method: 'POST',
                     body: formData
                 })
@@ -258,7 +258,7 @@
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = '/cps/?url=roles/delete&id=' + id;
+                window.location.href = '<?= BASE_URL ?>?url=roles/delete&id=' + id;
             }
         });
     }
@@ -266,11 +266,11 @@
     // Manage Permissions
     function managePermissions(id) {
         Promise.all([
-            fetch('/cps/?url=roles/get&id=' + id).then(r => r.json()),
-            fetch('/cps/?url=permissions').then(r => r.text())
+            fetch('<?= BASE_URL ?>?url=roles/get&id=' + id).then(r => r.json()),
+            fetch('<?= BASE_URL ?>?url=permissions').then(r => r.text())
         ]).then(([roleData, permissionsHtml]) => {
             // ดึงข้อมูล permissions จาก API
-            fetch('/cps/?url=roles/permissions&id=' + id)
+            fetch('<?= BASE_URL ?>?url=roles/permissions&id=' + id)
             .then(response => response.text())
             .then(html => {
                 const parser = new DOMParser();
@@ -305,7 +305,7 @@
             if (result.isConfirmed) {
                 const formData = new FormData(this);
                 
-                fetch('/cps/?url=roles/updatePermissions', {
+                fetch('<?= BASE_URL ?>?url=roles/updatePermissions', {
                     method: 'POST',
                     body: formData
                 })

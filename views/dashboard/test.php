@@ -112,7 +112,7 @@
                                     <div class="card-body text-center">
                                         <i class="fas fa-users fa-2x text-primary mb-2"></i>
                                         <h6>จัดการผู้ใช้</h6>
-                                        <a href="/cps/?url=users" class="btn btn-primary btn-sm">เข้าใช้</a>
+                                        <a href="<?= BASE_URL ?>?url=users" class="btn btn-primary btn-sm">เข้าใช้</a>
                                     </div>
                                 </div>
                             </div>
@@ -121,7 +121,7 @@
                                     <div class="card-body text-center">
                                         <i class="fas fa-user-shield fa-2x text-success mb-2"></i>
                                         <h6>จัดการสิทธิ์</h6>
-                                        <a href="/cps/?url=roles" class="btn btn-success btn-sm">เข้าใช้</a>
+                                        <a href="<?= BASE_URL ?>?url=roles" class="btn btn-success btn-sm">เข้าใช้</a>
                                     </div>
                                 </div>
                             </div>
@@ -130,7 +130,7 @@
                                     <div class="card-body text-center">
                                         <i class="fas fa-chart-bar fa-2x text-info mb-2"></i>
                                         <h6>รายงาน</h6>
-                                        <a href="/cps/?url=reports" class="btn btn-info btn-sm">เข้าใช้</a>
+                                        <a href="<?= BASE_URL ?>?url=reports" class="btn btn-info btn-sm">เข้าใช้</a>
                                     </div>
                                 </div>
                             </div>
@@ -139,7 +139,7 @@
                                     <div class="card-body text-center">
                                         <i class="fas fa-cogs fa-2x text-warning mb-2"></i>
                                         <h6>ตั้งค่าระบบ</h6>
-                                        <a href="/cps/?url=settings" class="btn btn-warning btn-sm">เข้าใช้</a>
+                                        <a href="<?= BASE_URL ?>?url=settings" class="btn btn-warning btn-sm">เข้าใช้</a>
                                     </div>
                                 </div>
                             </div>

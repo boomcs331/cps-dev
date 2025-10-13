@@ -33,9 +33,9 @@ class RoleController extends Controller {
             $roleModel = $this->model('Role');
             
             if ($roleModel->createRole($name, $display_name, $description)) {
-                header('Location: /cps/?url=roles&success=1');
+                header('Location: ' . BASE_URL . '?url=roles&success=1');
             } else {
-                header('Location: /cps/?url=roles&error=1');
+                header('Location: ' . BASE_URL . '?url=roles&error=1');
             }
             exit;
         }
@@ -65,9 +65,9 @@ class RoleController extends Controller {
             
             if ($roleModel->updateRole($id, $name, $display_name, $description, $is_active)) {
                 $roleModel->updateRolePermissions($id, $permissions);
-                header('Location: /cps/?url=roles&updated=1');
+                header('Location: ' . BASE_URL . '?url=roles&updated=1');
             } else {
-                header('Location: /cps/?url=roles&error=1');
+                header('Location: ' . BASE_URL . '?url=roles&error=1');
             }
             exit;
         }
@@ -98,9 +98,9 @@ class RoleController extends Controller {
             $roleModel = $this->model('Role');
             
             if ($roleModel->updateRolePermissions($roleId, $permissions)) {
-                header('Location: /cps/?url=roles&updated=1');
+                header('Location: ' . BASE_URL . '?url=roles&updated=1');
             } else {
-                header('Location: /cps/?url=roles&error=1');
+                header('Location: ' . BASE_URL . '?url=roles&error=1');
             }
             exit;
         }
@@ -111,9 +111,9 @@ class RoleController extends Controller {
             $roleModel = $this->model('Role');
             
             if ($roleModel->deleteRole($_GET['id'])) {
-                header('Location: /cps/?url=roles&deleted=1');
+                header('Location: ' . BASE_URL . '?url=roles&deleted=1');
             } else {
-                header('Location: /cps/?url=roles&error=1');
+                header('Location: ' . BASE_URL . '?url=roles&error=1');
             }
             exit;
         }

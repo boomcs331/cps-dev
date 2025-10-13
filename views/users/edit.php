@@ -17,7 +17,7 @@
             <div class="page-heading">
                 <div class="d-flex justify-content-between align-items-center">
                     <h3>แก้ไขผู้ใช้: <?= htmlspecialchars($user['username']) ?></h3>
-                    <a href="/cps/?url=users" class="btn btn-secondary">
+                    <a href="<?= BASE_URL ?>?url=users" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> กลับ
                     </a>
                 </div>

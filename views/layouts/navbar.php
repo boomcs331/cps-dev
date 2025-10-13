@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark navbar-blue">
     <div class="container">
-        <a class="navbar-brand" href="/cps/?url=dashboard">
+    <a class="navbar-brand" href="<?= BASE_URL ?>?url=dashboard">
             <i class="fas fa-shield-alt me-2"></i>
             ระบบจัดการ CPS
         </a>
@@ -12,7 +12,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/cps/?url=dashboard">
+                    <a class="nav-link" href="<?= BASE_URL ?>?url=dashboard">
                         <i class="fas fa-home me-1"></i>หน้าหลัก
                     </a>
                 </li>
@@ -25,7 +25,7 @@
                     
                     <?php if (in_array('user.view', $userPermissions)): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="/cps/?url=users">
+                        <a class="nav-link" href="<?= BASE_URL ?>?url=users">
                             <i class="fas fa-users me-1"></i>จัดการผู้ใช้
                         </a>
                     </li>
@@ -33,7 +33,7 @@
                     
                     <?php if (in_array('role.view', $userPermissions)): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="/cps/?url=roles">
+                        <a class="nav-link" href="<?= BASE_URL ?>?url=roles">
                             <i class="fas fa-user-tag me-1"></i>จัดการบทบาท
                         </a>
                     </li>
@@ -41,7 +41,7 @@
                     
                     <?php if (in_array('system.admin', $userPermissions)): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="/cps/?url=settings">
+                        <a class="nav-link" href="<?= BASE_URL ?>?url=settings">
                             <i class="fas fa-cog me-1"></i>ตั้งค่าระบบ
                         </a>
                     </li>
@@ -55,12 +55,12 @@
                         <i class="fas fa-user me-1"></i>
                         สวัสดี, <?= htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'ผู้ใช้') ?>
                     </span>
-                    <a class="btn btn-outline-light btn-sm" href="/cps/?url=logout">
+                    <a class="btn btn-outline-light btn-sm" href="<?= BASE_URL ?>?url=logout">
                         <i class="fas fa-sign-out-alt me-1"></i>
                         ออกจากระบบ
                     </a>
                 <?php else: ?>
-                    <a class="btn btn-outline-light btn-sm" href="/cps/?url=login">
+                    <a class="btn btn-outline-light btn-sm" href="<?= BASE_URL ?>?url=login">
                         <i class="fas fa-sign-in-alt me-1"></i>
                         เข้าสู่ระบบ
                     </a>

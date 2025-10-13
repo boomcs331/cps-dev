@@ -131,5 +131,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </form>
 
 <br><br>
-<a href="/cps/">Back to Login</a> | 
-<a href="/cps/?url=logout">Logout</a>
+<a href="<?= BASE_URL ?>">Back to Login</a> | 
+<a href="<?= BASE_URL ?>?url=logout">Logout</a>

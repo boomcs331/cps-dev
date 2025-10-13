@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เข้าสู่ระบบ - CPS</title>
-    <link href="/cps/lib/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/cps/lib/fontawesome/css/all.min.css" rel="stylesheet">
-    <link href="/cps/lib/css/login-new.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>lib/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>lib/fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>lib/css/login-new.css" rel="stylesheet">
 </head>
 
 <body>
@@ -73,7 +73,7 @@
         </div>
     </div>
 
-    <script src="/cps/lib/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= BASE_URL ?>lib/js/bootstrap.bundle.min.js"></script>
     <script>
         function fillLogin(username, password) {
             const usernameInput = document.getElementById('username');

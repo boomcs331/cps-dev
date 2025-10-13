@@ -192,7 +192,7 @@
             if (result.isConfirmed) {
                 const formData = new FormData(this);
                 
-                fetch('/cps/?url=users/store', {
+                fetch('<?= BASE_URL ?>?url=users/store', {
                     method: 'POST',
                     body: formData
                 })
@@ -211,7 +211,7 @@
 
     // Edit User
     function editUser(id) {
-        fetch('/cps/?url=users/get&id=' + id)
+    fetch('<?= BASE_URL ?>?url=users/get&id=' + id)
         .then(response => response.json())
         .then(data => {
             document.getElementById('edit_id').value = data.id;
@@ -246,7 +246,7 @@
             if (result.isConfirmed) {
                 const formData = new FormData(this);
                 
-                fetch('/cps/?url=users/update', {
+                fetch('<?= BASE_URL ?>?url=users/update', {
                     method: 'POST',
                     body: formData
                 })
@@ -276,7 +276,7 @@
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = '/cps/?url=users/delete&id=' + id;
+                window.location.href = '<?= BASE_URL ?>?url=users/delete&id=' + id;
             }
         });
     }

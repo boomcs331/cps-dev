@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เข้าสู่ระบบ - CPS</title>
-    <link href="/cps/lib/css/login-modern.css" rel="stylesheet">
-    <link href="/cps/lib/fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>lib/css/login-modern.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>lib/fontawesome/css/all.min.css" rel="stylesheet">
 </head>
 
 <body>
