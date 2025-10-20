@@ -1,3 +1,19 @@
+<?php
+$navCurrent = $_GET['url'] ?? '';
+if ($navCurrent === '' && isset($_SERVER['REQUEST_URI'])) {
+    $requestPath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+    $basePath = trim(BASE_URL, '/');
+    if ($basePath !== '' && strpos($requestPath, $basePath) === 0) {
+        $requestPath = ltrim(substr($requestPath, strlen($basePath)), '/');
+    }
+    $navCurrent = $requestPath;
+}
+$navCurrent = trim($navCurrent);
+if ($navCurrent === '') {
+    $navCurrent = 'dashboard';
+}
+$navCurrentSegment = explode('/', $navCurrent)[0];
+?>
 <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #435ebe 0%, #5a6acf 100%);">
     <div class="container-fluid">
     <a class="navbar-brand" href="<?= BASE_URL ?>?url=dashboard">
@@ -12,8 +28,13 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" href="<?= BASE_URL ?>?url=dashboard">
+                    <a class="nav-link <?= $navCurrentSegment === 'dashboard' ? 'active' : '' ?>" href="<?= BASE_URL ?>?url=dashboard">
                         <i class="fas fa-home me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= $navCurrentSegment === 'pc' ? 'active' : '' ?>" href="<?= BASE_URL ?>?url=pc">
+                        <i class="fas fa-clipboard-check me-1"></i>Part Control
                     </a>
                 </li>
                 <li class="nav-item dropdown">

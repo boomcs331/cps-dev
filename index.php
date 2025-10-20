@@ -22,6 +22,7 @@ $router->addRoute('/login', 'AuthController', 'login');
 $router->addRoute('/logout', 'AuthController', 'logout');
 $router->addRoute('/dashboard', 'DashboardController', 'index');
 $router->addRoute('/test', 'DashboardController', 'test');
+$router->addRoute('/pc', 'PartControlController', 'index');
 $router->addRoute('/permissions', 'PermissionController', 'index');
 $router->addRoute('/permissions/create', 'PermissionController', 'create');
 $router->addRoute('/permissions/store', 'PermissionController', 'store');
