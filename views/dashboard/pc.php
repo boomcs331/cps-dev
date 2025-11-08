@@ -1,497 +1,362 @@
+<?php
+require_once 'helpers/MenuHelper.php';
+
+$permissions = $permissions ?? ($_SESSION['permissions'] ?? []);
+if (!is_array($permissions)) {
+    $permissions = [];
+}
+
+$dashboardMetrics = $dashboardMetrics ?? [];
+
+$kpiCards = [
+    [
+        'title' => 'วัตถุดิบทั้งหมด',
+        'value' => number_format($dashboardMetrics['total_materials'] ?? 2840),
+        'trend' => $dashboardMetrics['materials_trend'] ?? '+12 รายการใหม่',
+        'trendType' => $dashboardMetrics['materials_trend_type'] ?? 'up',
+    ],
+    [
+        'title' => 'คงคลังต่ำ',
+        'value' => number_format($dashboardMetrics['low_stock'] ?? 47),
+        'trend' => $dashboardMetrics['low_stock_trend'] ?? 'ต้องเติมสต็อก',
+        'trendType' => $dashboardMetrics['low_stock_trend_type'] ?? 'warning',
+    ],
+    [
+        'title' => 'ซัพพลายเออร์',
+        'value' => number_format($dashboardMetrics['suppliers'] ?? 156),
+        'trend' => $dashboardMetrics['suppliers_trend'] ?? 'ใช้งานปกติ',
+        'trendType' => $dashboardMetrics['suppliers_trend_type'] ?? 'neutral',
+    ],
+    [
+        'title' => 'มูลค่าคงคลัง',
+        'value' => '฿' . number_format($dashboardMetrics['inventory_value'] ?? 18500000),
+        'trend' => $dashboardMetrics['inventory_trend'] ?? '+2.8% จากเดือนก่อน',
+        'trendType' => $dashboardMetrics['inventory_trend_type'] ?? 'up',
+    ],
+];
+
+$materialBreakdown = $materialBreakdown ?? [
+    ['name' => 'วัตถุดิบหลัก', 'value' => 1280, 'percent' => 45],
+    ['name' => 'วัตถุดิบรอง', 'value' => 860, 'percent' => 30],
+    ['name' => 'วัสดุสิ้นเปลือง', 'value' => 480, 'percent' => 17],
+    ['name' => 'อะไหล่', 'value' => 220, 'percent' => 8],
+];
+
+$weeklyComparison = $weeklyComparison ?? [
+    ['week' => 'สัปดาห์ 39', 'inventory' => 12000, 'orders' => 8600],
+    ['week' => 'สัปดาห์ 40', 'inventory' => 11500, 'orders' => 9200],
+    ['week' => 'สัปดาห์ 41', 'inventory' => 13200, 'orders' => 10800],
+    ['week' => 'สัปดาห์ 42', 'inventory' => 12800, 'orders' => 9400],
+];
+
+$materialWeekly = $materialWeekly ?? [
+    'ST-304-16MM' => [
+        'label' => 'STAINLESS STEEL 304',
+        'weeks' => [
+            ['week' => '39', 'inventory' => 2400, 'orders' => 1800],
+            ['week' => '40', 'inventory' => 2200, 'orders' => 2100],
+            ['week' => '41', 'inventory' => 2600, 'orders' => 1900],
+            ['week' => '42', 'inventory' => 2300, 'orders' => 2000],
+        ],
+    ],
+    'AL-6061-T6' => [
+        'label' => 'ALUMINUM ALLOY 6061',
+        'weeks' => [
+            ['week' => '39', 'inventory' => 1800, 'orders' => 1600],
+            ['week' => '40', 'inventory' => 1900, 'orders' => 1700],
+            ['week' => '41', 'inventory' => 2100, 'orders' => 1800],
+            ['week' => '42', 'inventory' => 1950, 'orders' => 1650],
+        ],
+    ],
+    'CR-STEEL-S45C' => [
+        'label' => 'CARBON STEEL S45C',
+        'weeks' => [
+            ['week' => '39', 'inventory' => 1600, 'orders' => 1400],
+            ['week' => '40', 'inventory' => 1750, 'orders' => 1550],
+            ['week' => '41', 'inventory' => 1680, 'orders' => 1620],
+            ['week' => '42', 'inventory' => 1720, 'orders' => 1480],
+        ],
+    ],
+];
+
+$supplierStatus = $supplierStatus ?? [
+    ['supplier' => 'บริษัท เหล็กไทย จำกัด', 'detail' => 'ส่งมอบตรงเวลา 98.5% · คุณภาพดี', 'status' => 'ปกติ'],
+    ['supplier' => 'อลูมิเนียม อินดัสทรี่', 'detail' => 'ล่าช้า 2 วัน · รอการยืนยัน', 'status' => 'เฝ้าระวัง'],
+    ['supplier' => 'สแตนเลส ซัพพลาย', 'detail' => 'คุณภาพไม่ผ่าน QC · ส่งคืน', 'status' => 'หยุดฉุกเฉิน'],
+];
+
+$materialAlerts = $materialAlerts ?? [
+    ['title' => 'เหล็กเกรด S45C คงคลังต่ำ', 'meta' => 'เหลือ 180 ชิ้น · ต่ำกว่า Safety Stock', 'type' => 'critical'],
+    ['title' => 'อลูมิเนียม 6061 ล่าช้า', 'meta' => 'ซัพพลายเออร์แจ้งล่าช้า 3 วัน', 'type' => 'warning'],
+    ['title' => 'ตรวจสอบคุณภาพ Lot ST304-2411', 'meta' => 'QC ขอตรวจเพิ่มเติม', 'type' => 'info'],
+];
+
+$inspectionTasks = $inspectionTasks ?? [
+    ['title' => 'ตรวจรับ Lot เหล็ก S45C', 'meta' => 'จาก บริษัท เหล็กไทย · 500 ชิ้น', 'time' => 'วันนี้ 14:00 น.'],
+    ['title' => 'ตรวจคุณภาพอลูมิเนียม', 'meta' => 'Lot AL-2411-B · ตรวจสี่เหลี่ยม', 'time' => 'พรุ่งนี้ 09:30 น.'],
+    ['title' => 'อัปเดตสถานะคลัง WH-A', 'meta' => 'นับสต็อกประจำสัปดาห์', 'time' => 'ศุกร์ 16:00 น.'],
+];
+
+$allMenuItems = MenuHelper::getAccessibleMenuItems();
+$menuItems = array_filter($allMenuItems, function($item) {
+    $pcRelated = ['materials', 'part', 'inventory', 'stock', 'supplier'];
+    $url = strtolower($item['url'] ?? '');
+    $title = strtolower($item['title'] ?? '');
+    foreach ($pcRelated as $keyword) {
+        if (strpos($url, $keyword) !== false || strpos($title, $keyword) !== false) {
+            return true;
+        }
+    }
+    return false;
+});
+
+$maxWeeklyValue = 0;
+foreach ($weeklyComparison as $week) {
+    $maxWeeklyValue = max($maxWeeklyValue, $week['inventory'], $week['orders']);
+}
+$maxWeeklyValue = $maxWeeklyValue ?: 1;
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Part Control Material Dashboard</title>
-    <link rel="shortcut icon" href="./lib/compiled/svg/favicon.svg" type="image/x-icon">
-    <link rel="stylesheet" href="./lib/compiled/css/app.css">
-    <link rel="stylesheet" href="./lib/compiled/css/app-dark.css">
-    <link rel="stylesheet" href="./lib/compiled/css/iconly.css">
-    <link rel="stylesheet" href="./lib/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="./lib/css/pc-dashboard.css">
+    <title>Part Control Dashboard - CPS</title>
+    <link rel="shortcut icon" href="<?= BASE_URL ?>lib/compiled/svg/favicon.svg" type="image/x-icon">
+    <link rel="stylesheet" href="<?= BASE_URL ?>lib/compiled/css/app.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>lib/compiled/css/app-dark.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>lib/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>lib/css/dashboard-shared.css">
 </head>
 
 <body>
-    <script src="lib/static/js/initTheme.js"></script>
+    <script src="<?= BASE_URL ?>lib/static/js/initTheme.js"></script>
     <div id="app">
         <?php include 'views/layouts/navbar-mazer.php'; ?>
 
-        <div class="container-fluid mt-3 pc-dashboard">
-            <div class="page-heading mb-3">
-                <div class="d-flex flex-wrap justify-content-between align-items-end gap-2">
-                    <div>
-                        <h3 class="mb-1">Part Control Material Dashboard</h3>
-                        <p class="text-muted mb-0">Real-time visibility on material availability, critical alerts, and inbound flow.</p>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted small">Updated: <?= date('d M Y H:i') ?></span>
-                        <a href="#" class="btn btn-primary btn-sm">
-                            <i class="fas fa-arrows-rotate me-1"></i> Sync Now
+        <div class="dashboard-container">
+            <header class="dashboard-hero">
+                <h1>แดชบอร์ด Part Control</h1>
+                <p>ภาพรวมการจัดการวัตถุดิบ สถานะคงคลัง และแจ้งเตือนสำคัญ</p>
+                                <div class="actions-bar">
+                    <div class="actions">
+                        <a class="button-link" href="<?= BASE_URL ?>?url=materials">
+                            <i class="fas fa-boxes"></i> ?,^?,?,"?,??,??,??,?,??,-?,,?,"?,'?,s
+                        </a>
+                        <a class="button-link secondary" href="<?= BASE_URL ?>?url=materials/reports">
+                            <i class="fas fa-chart-bar"></i> ?,??,??,??,?,??,T?,,?,?,,?,??,?,?
                         </a>
                     </div>
+                    <button type="button" class="button-link primary" data-bs-toggle="modal" data-bs-target="#addMaterialModal">
+                        <i class="fas fa-plus"></i> ?1??,??,??1?,??1,?,-?,?
+                    </button>
                 </div>
-            </div>
+            </header>
 
-            <div class="page-content">
-                <section class="row gy-4">
-                    <div class="col-12">
-                        <div class="row g-3">
-                            <?php
-                            $summaryIcons = [
-                                'Stock On Hand' => 'fa-boxes-stacked',
-                                'Incoming This Week' => 'fa-truck-loading',
-                                'Critical Alerts' => 'fa-radiation',
-                                'Kanban Cards' => 'fa-id-card-clip'
-                            ];
-                            foreach ($summaryCards as $card):
-                                $icon = $summaryIcons[$card['label']] ?? 'fa-chart-bar';
-                                $isUp = $card['trend'] === 'up';
-                            ?>
-                            <div class="col-12 col-sm-6 col-lg-3">
-                                <div class="card summary-card shadow-sm h-100">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div class="summary-icon bg-light text-primary">
-                                                <i class="fas <?= $icon ?>"></i>
-                                            </div>
-                                            <span class="badge bg-light text-primary">
-                                                <i class="fas <?= $isUp ? 'fa-arrow-up' : 'fa-arrow-down' ?> me-1"></i>
-                                                <?= number_format($card['change'], 1) ?>%
-                                            </span>
-                                        </div>
-                                        <p class="text-muted mt-3 mb-1 text-uppercase small"><?= htmlspecialchars($card['label']) ?></p>
-                                        <h2 class="fw-bold mb-0">
-                                            <?= number_format($card['value']) ?>
-                                            <span class="text-muted fs-6"><?= htmlspecialchars($card['unit']) ?></span>
-                                        </h2>
-                                        <span class="text-muted small">vs last 7 days</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php endforeach; ?>
-                        </div>
+            <?php if (!empty($menuItems)): ?>
+                <section class="menu-section">
+                    <div class="menu-header">
+                        <h2>เมนูที่สามารถเข้าถึงได้</h2>
+                        <p>เลือกจัดการโมดูลที่คุณมีสิทธิ์เข้าถึงได้อย่างรวดเร็ว</p>
                     </div>
-
-                    <div class="col-12 col-lg-8">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-0">Inventory Trend</h5>
-                                        <small class="text-muted">Utilization index across major material states</small>
+                    <div class="menu-grid">
+                        <?php foreach ($menuItems as $item): ?>
+                            <?php if ($item['type'] === 'link'): ?>
+                                <a class="menu-card" href="<?= htmlspecialchars($item['url']) ?>">
+                                    <div class="menu-card-icon">
+                                        <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
                                     </div>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-primary active" disabled>Last 6 Days</button>
-                                        <button class="btn btn-outline-primary" disabled>Last 4 Weeks</button>
+                                    <div class="menu-card-text">
+                                        <h3><?= htmlspecialchars($item['title']) ?></h3>
+                                        <p><?= htmlspecialchars($item['subtitle']) ?></p>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div id="inventoryTrendChart" style="min-height: 320px;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-4">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header">
-                                <h5 class="mb-0">Inventory Health</h5>
-                                <small class="text-muted">Coverage against plan</small>
-                            </div>
-                            <div class="card-body">
-                                <?php foreach ($inventoryHealth as $line): ?>
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between">
-                                        <span class="fw-semibold"><?= htmlspecialchars($line['name']) ?></span>
-                                        <span class="text-muted small"><?= $line['status'] ?></span>
-                                    </div>
-                                    <div class="progress" style="height: 10px;">
-                                        <div class="progress-bar bg-<?= $line['color'] ?>" role="progressbar" style="width: <?= $line['level'] ?>%"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between small text-muted mt-1">
-                                        <span>Level</span>
-                                        <span><?= $line['level'] ?>%</span>
-                                    </div>
-                                </div>
-                                <?php endforeach; ?>
-                                <hr>
-                                <div class="d-flex align-items-center gap-3 flex-wrap">
-                                    <div class="bullet-dot bg-success"></div><span class="small text-muted">Healthy &gt; 80%</span>
-                                    <div class="bullet-dot bg-warning"></div><span class="small text-muted">Monitor 60-80%</span>
-                                    <div class="bullet-dot bg-danger"></div><span class="small text-muted">Critical &lt; 60%</span>
-                                </div>
-                                <hr>
-                                <h6 class="text-muted text-uppercase small mb-2">Material Mix</h6>
-                                <div id="materialBreakdownChart" style="min-height: 220px;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-lg-6">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-0">Inbound Shipments</h5>
-                                    <small class="text-muted">Planned receiving in the next 72 hours</small>
-                                </div>
-                                <a href="#" class="btn btn-outline-primary btn-sm disabled">
-                                    <i class="fas fa-download me-1"></i> Export
                                 </a>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-borderless align-middle">
-                                        <thead class="text-muted small">
-                                            <tr>
-                                                <th scope="col">ETA</th>
-                                                <th scope="col">Supplier</th>
-                                                <th scope="col">PO</th>
-                                                <th scope="col" class="text-center">Items</th>
-                                                <th scope="col" class="text-end">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($incomingShipments as $shipment): ?>
-                                            <tr>
-                                                <td><?= htmlspecialchars($shipment['eta']) ?></td>
-                                                <td class="fw-semibold"><?= htmlspecialchars($shipment['supplier']) ?></td>
-                                                <td><span class="badge bg-light text-dark"><?= htmlspecialchars($shipment['po']) ?></span></td>
-                                                <td class="text-center"><?= $shipment['items'] ?></td>
-                                                <td class="text-end">
-                                                    <span class="badge bg-<?= $shipment['status_color'] ?>">
-                                                        <?= htmlspecialchars($shipment['status']) ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-6">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-0">Quality & Issues</h5>
-                                    <small class="text-muted">Latest containment status</small>
-                                </div>
-                                <span class="badge bg-light text-dark">
-                                    <i class="fas fa-flag me-1 text-danger"></i> Alerts: <?= count($qualityIssues) ?>
-                                </span>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-borderless align-middle">
-                                        <thead class="text-muted small">
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Part</th>
-                                                <th>Issue</th>
-                                                <th class="text-end">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($qualityIssues as $issue): ?>
-                                            <tr>
-                                                <td><?= htmlspecialchars(date('d M', strtotime($issue['date']))) ?></td>
-                                                <td class="fw-semibold"><?= htmlspecialchars($issue['part']) ?></td>
-                                                <td><?= htmlspecialchars($issue['issue']) ?></td>
-                                                <td class="text-end">
-                                                    <span class="badge bg-<?= $issue['status_color'] ?>">
-                                                        <?= htmlspecialchars($issue['status']) ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-lg-8">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-0">Stock Alerts</h5>
-                                        <small class="text-muted">Safety stock breaches and near misses</small>
+                            <?php elseif ($item['type'] === 'modal'): ?>
+                                <button type="button" class="menu-card menu-card-button" data-bs-toggle="modal" data-bs-target="<?= htmlspecialchars($item['target']) ?>">
+                                    <div class="menu-card-icon">
+                                        <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
                                     </div>
-                                    <span class="badge bg-danger"><i class="fas fa-bolt me-1"></i> Action Needed</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-borderless align-middle">
-                                        <thead class="text-muted small">
-                                            <tr>
-                                                <th>Part No.</th>
-                                                <th>Description</th>
-                                                <th class="text-center">On Hand</th>
-                                                <th class="text-center">Safety Stock</th>
-                                                <th class="text-center">Coverage</th>
-                                                <th class="text-end">Priority</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($stockAlerts as $alert): ?>
-                                            <tr>
-                                                <td class="fw-semibold"><?= htmlspecialchars($alert['part']) ?></td>
-                                                <td><?= htmlspecialchars($alert['description']) ?></td>
-                                                <td class="text-center"><?= number_format($alert['on_hand']) ?></td>
-                                                <td class="text-center"><?= number_format($alert['safety_stock']) ?></td>
-                                                <td class="text-center"><?= number_format($alert['coverage_days'], 1) ?> days</td>
-                                                <td class="text-end">
-                                                    <span class="badge bg-<?= $alert['priority_color'] ?>">
-                                                        <?= htmlspecialchars($alert['priority']) ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-4">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header">
-                                <h5 class="mb-0">Aging Lots</h5>
-                                <small class="text-muted">Lots over 21 days in storage</small>
-                            </div>
-                            <div class="card-body">
-                                <?php foreach ($agingLots as $lot): ?>
-                                <div class="kanban-card">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="badge bg-light text-dark"><?= htmlspecialchars($lot['part']) ?></span>
-                                        <span class="text-muted small"><?= $lot['age_days'] ?> days</span>
+                                    <div class="menu-card-text">
+                                        <h3><?= htmlspecialchars($item['title']) ?></h3>
+                                        <p><?= htmlspecialchars($item['subtitle']) ?></p>
                                     </div>
-                                    <p class="fw-semibold mb-1"><?= htmlspecialchars($lot['lot']) ?></p>
-                                    <div class="text-muted small">
-                                        <i class="fas fa-location-dot me-1 text-primary"></i><?= htmlspecialchars($lot['location']) ?>
-                                    </div>
-                                    <div class="small text-muted">
-                                        <i class="fas fa-user-gear me-1 text-success"></i>Owner: <?= htmlspecialchars($lot['owner']) ?>
-                                    </div>
-                                </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <div class="card shadow-sm">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-0">Line Readiness & Kanban</h5>
-                                    <small class="text-muted">Material coverage for assembly lines</small>
-                                </div>
-                                <span class="badge bg-light text-dark">
-                                    <i class="fas fa-industry me-1"></i> <?= count($lineReadiness) ?> Lines
-                                </span>
-                            </div>
-                            <div class="card-body">
-                                <div class="row g-3">
-                                    <div class="col-12 col-lg-5">
-                                        <div class="table-responsive">
-                                            <table class="table table-borderless align-middle">
-                                                <thead class="text-muted small">
-                                                    <tr>
-                                                        <th>Line</th>
-                                                        <th class="text-center">Today</th>
-                                                        <th class="text-center">Tomorrow</th>
-                                                        <th class="text-end">Status</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach ($lineReadiness as $line): ?>
-                                                    <tr>
-                                                        <td class="fw-semibold"><?= htmlspecialchars($line['line']) ?></td>
-                                                        <td class="text-center"><?= $line['today'] ?>%</td>
-                                                        <td class="text-center"><?= $line['tomorrow'] ?>%</td>
-                                                        <td class="text-end">
-                                                            <span class="badge bg-<?= $line['status_color'] ?>">
-                                                                <?= htmlspecialchars($line['status']) ?>
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-lg-7">
-                                        <div class="row g-3">
-                                            <div class="col-12 col-md-4">
-                                                <div class="kanban-column h-100">
-                                                    <div class="d-flex align-items-center mb-3">
-                                                        <div class="bullet-dot bg-warning me-2"></div>
-                                                        <span class="fw-semibold">Waiting</span>
-                                                    </div>
-                                                    <?php foreach ($kanbanBoard['waiting'] as $task): ?>
-                                                    <div class="kanban-card">
-                                                        <p class="fw-semibold mb-1"><?= htmlspecialchars($task['title']) ?></p>
-                                                        <div class="text-muted small"><i class="fas fa-user me-1"></i><?= htmlspecialchars($task['owner']) ?></div>
-                                                        <div class="text-muted small"><i class="fas fa-clock me-1"></i><?= htmlspecialchars($task['due']) ?></div>
-                                                    </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 col-md-4">
-                                                <div class="kanban-column h-100">
-                                                    <div class="d-flex align-items-center mb-3">
-                                                        <div class="bullet-dot bg-primary me-2"></div>
-                                                        <span class="fw-semibold">In Process</span>
-                                                    </div>
-                                                    <?php foreach ($kanbanBoard['in_process'] as $task): ?>
-                                                    <div class="kanban-card">
-                                                        <p class="fw-semibold mb-1"><?= htmlspecialchars($task['title']) ?></p>
-                                                        <div class="text-muted small"><i class="fas fa-user me-1"></i><?= htmlspecialchars($task['owner']) ?></div>
-                                                        <div class="text-muted small"><i class="fas fa-clock me-1"></i><?= htmlspecialchars($task['due']) ?></div>
-                                                    </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 col-md-4">
-                                                <div class="kanban-column h-100">
-                                                    <div class="d-flex align-items-center mb-3">
-                                                        <div class="bullet-dot bg-success me-2"></div>
-                                                        <span class="fw-semibold">Completed</span>
-                                                    </div>
-                                                    <?php foreach ($kanbanBoard['completed'] as $task): ?>
-                                                    <div class="kanban-card">
-                                                        <p class="fw-semibold mb-1"><?= htmlspecialchars($task['title']) ?></p>
-                                                        <div class="text-muted small"><i class="fas fa-user me-1"></i><?= htmlspecialchars($task['owner']) ?></div>
-                                                        <div class="text-muted small"><i class="fas fa-clock me-1"></i><?= htmlspecialchars($task['due']) ?></div>
-                                                    </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                </button>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
                     </div>
                 </section>
-            </div>
+            <?php endif; ?>
 
-            <footer>
-                <div class="footer clearfix mb-0 text-muted">
-                    <div class="float-start">
-                        <p><?= date('Y') ?> &copy; CPS Dashboard</p>
+            <section class="kpi-grid">
+                <?php foreach ($kpiCards as $card): ?>
+                    <article class="kpi-card">
+                        <h3><?= htmlspecialchars($card['title']) ?></h3>
+                        <strong><?= htmlspecialchars($card['value']) ?></strong>
+                        <span class="kpi-trend <?= htmlspecialchars($card['trendType']) ?>">
+                            <?= htmlspecialchars($card['trend']) ?>
+                        </span>
+                    </article>
+                <?php endforeach; ?>
+            </section>
+
+            <section class="chart-layout">
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>วัตถุดิบคงคลัง vs การสั่งซื้อ</h2>
+                            <span>เปรียบเทียบสี่สัปดาห์ล่าสุด</span>
+                        </div>
+                        <span class="status-chip">อัปเดต 09:45 น.</span>
                     </div>
-                    <div class="float-end">
-                        <p>Crafted for Part Control Material Excellence</p>
+                    <div class="weekly-compare-card">
+                        <?php foreach ($weeklyComparison as $week): ?>
+                            <?php
+                            $inventoryHeight = max(14, round(($week['inventory'] / $maxWeeklyValue) * 170));
+                            $ordersHeight = max(14, round(($week['orders'] / $maxWeeklyValue) * 170));
+                            ?>
+                            <div class="weekly-column">
+                                <div class="weekly-bars">
+                                    <div class="bar inventory" style="height: <?= $inventoryHeight ?>px;">
+                                        <?= round($week['inventory'] / 1000, 1) ?>k
+                                    </div>
+                                    <div class="bar orders" style="height: <?= $ordersHeight ?>px;">
+                                        <?= round($week['orders'] / 1000, 1) ?>k
+                                    </div>
+                                </div>
+                                <span class="weekly-label"><?= htmlspecialchars($week['week']) ?></span>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                </div>
-            </footer>
+                </article>
+
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>สัดส่วนวัตถุดิบตามประเภท</h2>
+                            <span>รวมทั้งหมด <?= number_format(array_sum(array_column($materialBreakdown, 'value'))) ?> รายการ</span>
+                        </div>
+                        <span class="status-chip">อัปเดตล่าสุด</span>
+                    </div>
+                    <div class="list">
+                        <?php foreach ($materialBreakdown as $item): ?>
+                            <div class="list-item">
+                                <h4><?= htmlspecialchars($item['name']) ?></h4>
+                                <span><?= number_format($item['value']) ?> รายการ · <?= $item['percent'] ?>%</span>
+                                <div style="height: 6px; border-radius: 999px; background: rgba(37, 99, 235, 0.12); overflow: hidden;">
+                                    <div style="width: <?= $item['percent'] ?>%; height: 100%; background: var(--accent);"></div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </article>
+            </section>
+
+            <section class="product-weekly-grid">
+                <?php foreach ($materialWeekly as $code => $material): ?>
+                    <?php
+                    $maxMaterialValue = 0;
+                    foreach ($material['weeks'] as $week) {
+                        $maxMaterialValue = max($maxMaterialValue, $week['inventory'], $week['orders']);
+                    }
+                    $maxMaterialValue = $maxMaterialValue ?: 1;
+                    $inventorySum = array_sum(array_column($material['weeks'], 'inventory'));
+                    $ordersSum = array_sum(array_column($material['weeks'], 'orders'));
+                    ?>
+                    <article class="product-week-card">
+                        <div class="product-header">
+                            <span class="product-code"><?= htmlspecialchars($code) ?></span>
+                            <span class="product-meta"><?= htmlspecialchars($material['label']) ?></span>
+                        </div>
+                        <div class="product-week-chart">
+                            <?php foreach ($material['weeks'] as $week): ?>
+                                <?php
+                                $inventoryHeight = max(12, round(($week['inventory'] / $maxMaterialValue) * 120));
+                                $ordersHeight = max(12, round(($week['orders'] / $maxMaterialValue) * 120));
+                                ?>
+                                <div class="product-week-column">
+                                    <div class="product-week-bars">
+                                        <div class="bar inventory" style="height: <?= $inventoryHeight ?>px;"></div>
+                                        <div class="bar orders" style="height: <?= $ordersHeight ?>px;"></div>
+                                    </div>
+                                    <span class="weekly-label">wk <?= htmlspecialchars($week['week']) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="product-week-summary">
+                            <span>คงคลังเฉลี่ย <?= number_format($inventorySum / count($material['weeks'])) ?> ชิ้น</span>
+                            <span>สั่งซื้อเฉลี่ย <?= number_format($ordersSum / count($material['weeks'])) ?> ชิ้น</span>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </section>
+
+            <section class="dual-column">
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>สถานะซัพพลายเออร์</h2>
+                            <span>ภาพรวมคู่ค้า</span>
+                        </div>
+                    </div>
+                    <div class="list">
+                        <?php foreach ($supplierStatus as $supplier): ?>
+                            <div class="list-item">
+                                <h4><?= htmlspecialchars($supplier['supplier']) ?></h4>
+                                <span><?= htmlspecialchars($supplier['detail']) ?></span>
+                                <span class="badge <?= $supplier['status'] === 'หยุดฉุกเฉิน' ? 'critical' : ($supplier['status'] === 'เฝ้าระวัง' ? 'warning' : 'info') ?>">
+                                    <?= htmlspecialchars($supplier['status']) ?>
+                                </span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>แจ้งเตือนวัตถุดิบ</h2>
+                            <span>อัปเดตแบบเรียลไทม์</span>
+                        </div>
+                    </div>
+                    <div class="list">
+                        <?php foreach ($materialAlerts as $alert): ?>
+                            <div class="list-item">
+                                <h4><?= htmlspecialchars($alert['title']) ?></h4>
+                                <span><?= htmlspecialchars($alert['meta']) ?></span>
+                                <span class="badge <?= htmlspecialchars($alert['type']) ?>">
+                                    <?= strtoupper($alert['type']) ?>
+                                </span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>งานตรวจสอบ</h2>
+                            <span>ภายใน 24 ชั่วโมง</span>
+                        </div>
+                    </div>
+                    <div class="list">
+                        <?php foreach ($inspectionTasks as $task): ?>
+                            <div class="list-item">
+                                <h4><?= htmlspecialchars($task['title']) ?></h4>
+                                <span><?= htmlspecialchars($task['meta']) ?></span>
+                                <span class="badge info"><?= htmlspecialchars($task['time']) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </article>
+            </section>
         </div>
     </div>
 
-    <script src="lib/static/js/components/dark.js"></script>
-    <script src="lib/extensions/perfect-scrollbar/perfect-scrollbar.min.js"></script>
-    <script src="lib/compiled/js/app.js"></script>
-    <script src="lib/extensions/apexcharts/apexcharts.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const inventoryTrendOptions = {
-                chart: {
-                    type: 'area',
-                    height: 320,
-                    toolbar: { show: false }
-                },
-                colors: ['#435ebe', '#ff7976', '#5ddab4'],
-                dataLabels: { enabled: false },
-                stroke: {
-                    curve: 'smooth',
-                    width: 3
-                },
-                series: <?= json_encode($inventoryTrend['series']) ?>,
-                xaxis: {
-                    categories: <?= json_encode($inventoryTrend['categories']) ?>,
-                    labels: { style: { colors: '#6c757d' } }
-                },
-                yaxis: {
-                    labels: {
-                        style: { colors: '#6c757d' },
-                        formatter: function(value) {
-                            return value + '%';
-                        }
-                    }
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(value) {
-                            return value + '% of plan';
-                        }
-                    }
-                },
-                fill: {
-                    type: 'gradient',
-                    gradient: {
-                        shadeIntensity: 1,
-                        opacityFrom: 0.35,
-                        opacityTo: 0.05,
-                        stops: [0, 90, 100]
-                    }
-                },
-                legend: {
-                    position: 'top',
-                    horizontalAlign: 'left'
-                },
-                grid: {
-                    strokeDashArray: 6,
-                    borderColor: '#e9ecef'
-                }
-            };
-
-            const trendChart = new ApexCharts(document.querySelector('#inventoryTrendChart'), inventoryTrendOptions);
-            trendChart.render();
-
-            const materialBreakdownOptions = {
-                chart: {
-                    type: 'donut',
-                    height: 220
-                },
-                series: <?= json_encode($materialBreakdown['series']) ?>,
-                labels: <?= json_encode($materialBreakdown['labels']) ?>,
-                colors: ['#435ebe', '#ff7976', '#5ddab4', '#ffc107'],
-                legend: {
-                    position: 'bottom'
-                },
-                dataLabels: {
-                    formatter: function(value) {
-                        return value.toFixed(1) + '%';
-                    }
-                },
-                plotOptions: {
-                    pie: {
-                        donut: {
-                            size: '60%',
-                            labels: {
-                                show: true,
-                                total: {
-                                    label: 'Total',
-                                    formatter: function() {
-                                        return '100%';
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            const materialChart = new ApexCharts(document.querySelector('#materialBreakdownChart'), materialBreakdownOptions);
-            materialChart.render();
-        });
-    </script>
+    <script src="<?= BASE_URL ?>lib/compiled/js/app.js"></script>
 </body>
 
 </html>
+
+
+
