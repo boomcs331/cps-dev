@@ -142,15 +142,15 @@ $maxWeeklyValue = $maxWeeklyValue ?: 1;
                                 <div class="actions-bar">
                     <div class="actions">
                         <a class="button-link" href="<?= BASE_URL ?>?url=materials">
-                            <i class="fas fa-boxes"></i> ?,^?,?,"?,??,??,??,?,??,-?,,?,"?,'?,s
+                            <i class="fas fa-boxes"></i> จัดการวัตถุดิบ
                         </a>
                         <a class="button-link secondary" href="<?= BASE_URL ?>?url=materials/reports">
-                            <i class="fas fa-chart-bar"></i> ?,??,??,??,?,??,T?,,?,?,,?,??,?,?
+                            <i class="fas fa-chart-bar"></i> รายงานคงคลัง
                         </a>
                     </div>
-                    <button type="button" class="button-link primary" data-bs-toggle="modal" data-bs-target="#addMaterialModal">
-                        <i class="fas fa-plus"></i> ?1??,??,??1?,??1,?,-?,?
-                    </button>
+                    <a class="button-link" href="<?= BASE_URL ?>?url=materials/add">
+                        <i class="fas fa-plus"></i> เพิ่มวัตถุดิบ
+                    </a>
                 </div>
             </header>
 

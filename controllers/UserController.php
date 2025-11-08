@@ -1,4 +1,5 @@
 <?php
+require_once 'core/Controller.php';
 
 class UserController extends Controller {
     
@@ -13,6 +14,7 @@ class UserController extends Controller {
         $users = $userModel->getAllUsersWithPagination($search, $page, $perPage);
         $totalRecords = $userModel->getTotalUsers($search);
         $roles = $userModel->getAllRoles();
+        $userStats = $userModel->getUserStats();
         
         $data = [
             'users' => $users,
@@ -20,7 +22,8 @@ class UserController extends Controller {
             'perPage' => $perPage,
             'totalRecords' => $totalRecords,
             'search' => $search,
-            'roles' => $roles
+            'roles' => $roles,
+            'userStats' => $userStats
         ];
         
         $this->view('users/index', $data);
@@ -55,6 +58,11 @@ class UserController extends Controller {
             if (empty($email)) $errors[] = 'กรุณากรอกอีเมล';
             if (empty($password)) $errors[] = 'กรุณากรอกรหัสผ่าน';
             if (empty($full_name)) $errors[] = 'กรุณากรอกชื่อเต็ม';
+            
+            // ตรวจสอบ username ซ้ำ
+            if (!empty($username) && $userModel->isUsernameExists($username)) {
+                $errors[] = 'ชื่อผู้ใช้นี้มีคนใช้แล้ว';
+            }
             
             if (!empty($errors)) {
                 echo json_encode(['success' => false, 'message' => implode(', ', $errors)]);
@@ -153,20 +161,29 @@ class UserController extends Controller {
     }
     
     public function get() {
+        header('Content-Type: application/json');
+        
         if (isset($_GET['id'])) {
             $userModel = $this->model('User');
             $user = $userModel->getUserById($_GET['id']);
-            $userRoles = $userModel->getUserRoles($_GET['id']);
             
-            $user['roles'] = $userRoles;
-            
-            header('Content-Type: application/json');
-            echo json_encode($user);
-            exit;
+            if ($user) {
+                $userRoles = $userModel->getUserRoles($_GET['id']);
+                $user['roles'] = $userRoles;
+                
+                echo json_encode(['success' => true, 'user' => $user]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'ไม่พบผู้ใช้']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'ไม่ได้ระบุ ID ผู้ใช้']);
         }
+        exit;
     }
     
     public function update() {
+        header('Content-Type: application/json');
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? '';
             $username = $_POST['username'] ?? '';
@@ -177,26 +194,48 @@ class UserController extends Controller {
             
             $userModel = $this->model('User');
             
-            if ($userModel->updateUser($id, $username, $email, $full_name, $roles, $is_active)) {
-                header('Location: ' . BASE_URL . '?url=users&updated=1');
-            } else {
-                header('Location: ' . BASE_URL . '?url=users&error=1');
+            // ตรวจสอบข้อมูล
+            $errors = [];
+            if (empty($username)) $errors[] = 'กรุณากรอกชื่อผู้ใช้';
+            if (empty($email)) $errors[] = 'กรุณากรอกอีเมล';
+            if (empty($full_name)) $errors[] = 'กรุณากรอกชื่อเต็ม';
+            
+            // ตรวจสอบ username ซ้ำ
+            if (!empty($username) && $userModel->isUsernameExists($username, $id)) {
+                $errors[] = 'ชื่อผู้ใช้นี้มีคนใช้แล้ว';
             }
-            exit;
+            
+            if (!empty($errors)) {
+                echo json_encode(['success' => false, 'message' => implode(', ', $errors)]);
+                exit;
+            }
+            
+            if ($userModel->updateUser($id, $username, $email, $full_name, $roles, $is_active)) {
+                echo json_encode(['success' => true, 'message' => 'แก้ไขผู้ใช้เรียบร้อยแล้ว']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการแก้ไขข้อมูล']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Invalid request method']);
         }
+        exit;
     }
     
     public function delete() {
+        header('Content-Type: application/json');
+        
         if (isset($_GET['id'])) {
             $userModel = $this->model('User');
             
             if ($userModel->deleteUser($_GET['id'])) {
-                header('Location: ' . BASE_URL . '?url=users&deleted=1');
+                echo json_encode(['success' => true, 'message' => 'ลบผู้ใช้เรียบร้อยแล้ว']);
             } else {
-                header('Location: ' . BASE_URL . '?url=users&error=1');
+                echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการลบผู้ใช้']);
             }
-            exit;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'ไม่ได้ระบุ ID ผู้ใช้']);
         }
+        exit;
     }
     
     private function checkPermission($permission) {

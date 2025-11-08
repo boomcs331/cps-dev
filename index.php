@@ -38,10 +38,21 @@ $router->addRoute('/roles/delete', 'RoleController', 'delete');
 $router->addRoute('/roles/permissions', 'RoleController', 'permissions');
 $router->addRoute('/roles/updatePermissions', 'RoleController', 'updatePermissions');
 $router->addRoute('/users', 'UserController', 'index');
+$router->addRoute('/users/create', 'UserController', 'create');
 $router->addRoute('/users/store', 'UserController', 'store');
 $router->addRoute('/users/get', 'UserController', 'get');
 $router->addRoute('/users/update', 'UserController', 'update');
 $router->addRoute('/users/delete', 'UserController', 'delete');
+$router->addRoute('/materials', 'MaterialController', 'index');
+$router->addRoute('/materials/index', 'MaterialController', 'index');
+$router->addRoute('/materials/page/{page}', 'MaterialController', 'index');
+$router->addRoute('/materials/table', 'MaterialController', 'table');
+$router->addRoute('/materials/add', 'MaterialController', 'add');
+$router->addRoute('/materials/store', 'MaterialController', 'store');
+$router->addRoute('/materials/get', 'MaterialController', 'get');
+$router->addRoute('/materials/edit/{id}', 'MaterialController', 'edit');
+$router->addRoute('/materials/update', 'MaterialController', 'update');
+$router->addRoute('/materials/delete', 'MaterialController', 'delete');
 
 
 

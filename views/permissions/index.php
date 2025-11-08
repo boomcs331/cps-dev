@@ -42,13 +42,28 @@
                         <?php endif; ?>
 
                         <?php
-                        $table = ServerSideTable::create(
+                        require_once 'helpers/UniversalTable.php';
+                        require_once 'helpers/TableFilterHelper.php';
+                        
+                        $filterHelper = TableFilterHelper::create()
+                            ->addFilter('module', 'โมดูล', array_unique(array_column($permissions ?? [], 'module')), 'select')
+                            ->addSort('name', 'ชื่อสิทธิ์', true)
+                            ->addSort('display_name', 'ชื่อแสดง')
+                            ->addSort('module', 'โมดูล')
+                            ->addSearchField('name')
+                            ->addSearchField('display_name')
+                            ->addSearchField('description');
+                        
+                        $table = UniversalTable::create(
                             $permissions, 
                             $currentPage, 
                             $perPage, 
                             $totalRecords
                         )
-                            ->addColumn('id', 'ID')
+                            ->setTitle('จัดการสิทธิ์', 'จัดการสิทธิ์การเข้าถึงระบบ')
+                            ->setTheme('classic')
+                            ->setFilterHelper($filterHelper)
+                            ->addColumn('id', 'ID', ['width' => '60px'])
                             ->addColumn('name', 'ชื่อสิทธิ์')
                             ->addColumn('display_name', 'ชื่อแสดง')
                             ->addColumn('description', 'คำอธิบาย')

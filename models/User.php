@@ -240,4 +240,32 @@ class User extends Model {
             return false;
         }
     }
+    
+    public function isUsernameExists($username, $excludeId = null) {
+        $sql = "SELECT COUNT(*) as count FROM users WHERE username = ?";
+        $params = [$username];
+        
+        if ($excludeId) {
+            $sql .= " AND id != ?";
+            $params[] = $excludeId;
+        }
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $result['count'] > 0;
+    }
+    
+    public function getUserStats() {
+        $sql = "SELECT 
+                    COUNT(*) as total,
+                    SUM(is_active) as active,
+                    COUNT(*) - SUM(is_active) as inactive
+                FROM users";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

@@ -9,59 +9,216 @@
     <link rel="stylesheet" href="./lib/compiled/css/app-dark.css">
     <link rel="stylesheet" href="./lib/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="./lib/extensions/sweetalert2/sweetalert2.min.css">
+    <link rel="stylesheet" href="./lib/css/dashboard-shared.css">
 </head>
 
 <body>
     <div id="app">
         <?php include 'views/layouts/navbar-mazer.php'; ?>
 
-        <div class="container-fluid mt-3">
-            <div class="page-heading">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3>จัดการผู้ใช้</h3>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+        <div class="dashboard-container">
+            <!-- Header Section -->
+            <header class="dashboard-hero">
+                <h1><i class="fas fa-users"></i> จัดการผู้ใช้</h1>
+                <p>จัดการข้อมูลผู้ใช้และสิทธิ์การเข้าถึงระบบ</p>
+                <div class="actions-bar">
+                    <div class="actions">
+                        <input type="text" class="form-control" placeholder="ค้นหาผู้ใช้..." id="searchInput" style="width: 300px; border-radius: 12px;">
+                        <select class="form-select" id="statusFilter" style="width: 150px; border-radius: 12px;">
+                            <option value="">สถานะทั้งหมด</option>
+                            <option value="1">เปิดใช้งาน</option>
+                            <option value="0">ปิดใช้งาน</option>
+                        </select>
+                    </div>
+                    <button type="button" class="button-link" data-bs-toggle="modal" data-bs-target="#createModal">
                         <i class="fas fa-plus"></i> เพิ่มผู้ใช้ใหม่
                     </button>
                 </div>
-            </div>
+            </header>
 
-            <div class="page-content">
-                <div class="card">
-                    <div class="card-body">
-                        <?php if (isset($_GET['success'])): ?>
-                            <div class="alert alert-success">เพิ่มผู้ใช้สำเร็จ</div>
-                        <?php endif; ?>
-                        <?php if (isset($_GET['updated'])): ?>
-                            <div class="alert alert-success">แก้ไขผู้ใช้สำเร็จ</div>
-                        <?php endif; ?>
-                        <?php if (isset($_GET['deleted'])): ?>
-                            <div class="alert alert-success">ลบผู้ใช้สำเร็จ</div>
-                        <?php endif; ?>
-                        <?php if (isset($_GET['error'])): ?>
-                            <div class="alert alert-danger">เกิดข้อผิดพลาด</div>
-                        <?php endif; ?>
+            <!-- Stats Cards -->
+            <section class="kpi-grid">
+                <article class="kpi-card">
+                    <h3>ผู้ใช้ทั้งหมด</h3>
+                    <strong><?= $userStats['total'] ?></strong>
+                    <span class="kpi-trend neutral">รวมทุกสถานะ</span>
+                </article>
+                <article class="kpi-card">
+                    <h3>ผู้ใช้ที่เปิดใช้งาน</h3>
+                    <strong><?= $userStats['active'] ?></strong>
+                    <span class="kpi-trend up">พร้อมใช้งาน</span>
+                </article>
+                <article class="kpi-card">
+                    <h3>ผู้ใช้ที่ปิดใช้งาน</h3>
+                    <strong><?= $userStats['inactive'] ?></strong>
+                    <span class="kpi-trend down">ไม่ได้ใช้งาน</span>
+                </article>
+                <article class="kpi-card">
+                    <h3>บทบาททั้งหมด</h3>
+                    <strong><?= count($roles) ?></strong>
+                    <span class="kpi-trend neutral">ระดับสิทธิ์</span>
+                </article>
+            </section>
 
-                        <?php
-                        $table = ServerSideTable::create(
-                            $users, 
-                            $currentPage, 
-                            $perPage, 
-                            $totalRecords
-                        )
-                            ->addColumn('id', 'ID')
-                            ->addColumn('username', 'ชื่อผู้ใช้')
-                            ->addColumn('full_name', 'ชื่อเต็ม')
-                            ->addColumn('email', 'อีเมล')
-                            ->addColumn('role_names', 'บทบาท')
-                            ->addColumn('is_active', 'สถานะ', function($value) {
-                                return $value ? '<span class="badge bg-success">เปิดใช้งาน</span>' : '<span class="badge bg-danger">ปิดใช้งาน</span>';
-                            })
-                            ->addAction('แก้ไข', 'javascript:editUser({id})', 'btn-warning', 'fas fa-edit')
-                            ->addAction('ลบ', 'javascript:deleteUser({id})', 'btn-danger', 'fas fa-trash');
-                        
-                        echo $table->render();
-                        ?>
+            <!-- Alerts -->
+            <?php if (isset($_GET['success'])): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>เพิ่มผู้ใช้สำเร็จ
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+            <?php if (isset($_GET['updated'])): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>แก้ไขผู้ใช้สำเร็จ
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+            <?php if (isset($_GET['deleted'])): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>ลบผู้ใช้สำเร็จ
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+            <?php if (isset($_GET['error'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>เกิดข้อผิดพลาด
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+
+            <!-- Users Table -->
+            <section class="card">
+                <div class="table-responsive">
+                    <table class="table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>ผู้ใช้</th>
+                                <th>อีเมล</th>
+                                <th>บทบาท</th>
+                                <th>สถานะ</th>
+                                <th>วันที่สมัคร</th>
+                                <th>จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($users as $user): ?>
+                                <tr class="user-item"
+                                    data-username="<?= strtolower($user['username']) ?>"
+                                    data-fullname="<?= strtolower($user['full_name']) ?>"
+                                    data-email="<?= strtolower($user['email']) ?>"
+                                    data-status="<?= $user['is_active'] ?>">
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <!-- <div class="summary-icon icon-orange" style="width: 40px; height: 40px; font-size: 16px;">
+                                                <?= strtoupper(substr($user['full_name'], 0, 1)) ?>
+                                            </div> -->
+                                            <div>
+                                                <strong><?= htmlspecialchars($user['full_name']) ?></strong><br>
+                                                <small class="text-muted">@<?= htmlspecialchars($user['username']) ?></small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><?= htmlspecialchars($user['email']) ?></td>
+                                    <td>
+                                        <?php
+                                        $roles_list = explode(', ', $user['role_names']);
+                                        foreach ($roles_list as $role):
+                                        ?>
+                                            <span class="badge info" style="margin: 1px; font-size: 11px;"><?= htmlspecialchars($role) ?></span>
+                                        <?php endforeach; ?>
+                                    </td>
+                                    <td>
+                                        <span class="badge <?= $user['is_active'] ? 'info' : 'warning' ?>">
+                                            <?= $user['is_active'] ? 'เปิดใช้งาน' : 'ปิดใช้งาน' ?>
+                                        </span>
+                                    </td>
+                                    <td><?= date('d/m/Y', strtotime($user['created_at'])) ?></td>
+                                    <td>
+                                        <div style="display: flex; gap: 4px;">
+                                            <button class="btn btn-warning btn-sm" onclick="editUser(<?= $user['id'] ?>)" title="แก้ไข">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteUser(<?= $user['id'] ?>)" title="ลบ">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Pagination -->
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-muted">
+                            แสดง <?= (($currentPage - 1) * $perPage) + 1 ?> - <?= min($currentPage * $perPage, $totalRecords) ?> จาก <?= number_format($totalRecords) ?> รายการ
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted">แสดงต่อหน้า:</span>
+                            <select class="form-select form-select-sm" style="width: auto;" onchange="changePerPage(this.value)">
+                                <option value="10" <?= $perPage == 10 ? 'selected' : '' ?>>10</option>
+                                <option value="25" <?= $perPage == 25 ? 'selected' : '' ?>>25</option>
+                                <option value="50" <?= $perPage == 50 ? 'selected' : '' ?>>50</option>
+                                <option value="100" <?= $perPage == 100 ? 'selected' : '' ?>>100</option>
+                            </select>
+                        </div>
                     </div>
+                    
+                    <?php 
+                    $totalPages = ceil($totalRecords / $perPage);
+                    if ($totalPages > 1): 
+                    ?>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            <?php if ($currentPage > 2): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1&per_page=<?= $perPage ?>" title="หน้าแรก">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <?php if ($currentPage > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?= $currentPage - 1 ?>&per_page=<?= $perPage ?>" title="หน้าก่อนหน้า">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+
+                            <?php
+                            $start = max(1, $currentPage - 2);
+                            $end = min($totalPages, $currentPage + 2);
+                            
+                            for ($i = $start; $i <= $end; $i++):
+                            ?>
+                                <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $i ?>&per_page=<?= $perPage ?>"><?= $i ?></a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <?php if ($currentPage < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?= $currentPage + 1 ?>&per_page=<?= $perPage ?>" title="หน้าถัดไป">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <?php if ($currentPage < $totalPages - 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?= $totalPages ?>&per_page=<?= $perPage ?>" title="หน้าสุดท้าย">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -157,7 +314,7 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <div class="form-check">
+                            <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" name="is_active" id="edit_is_active" value="1">
                                 <label class="form-check-label" for="edit_is_active">เปิดใช้งาน</label>
                             </div>
@@ -165,121 +322,261 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                        <button type="submit" class="btn btn-primary">บันทึก</button>
+                        <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <script src="lib/compiled/js/app.js"></script>
+    <script src="./lib/compiled/js/app.js"></script>
     <script src="./lib/extensions/sweetalert2/sweetalert2.min.js"></script>
     <script>
-    // Create User
-    document.getElementById('createForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        Swal.fire({
-            title: 'ยืนยันการบันทึก',
-            text: 'ต้องการบันทึกข้อมูลหรือไม่?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'บันทึก',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const formData = new FormData(this);
-                
-                fetch('<?= BASE_URL ?>?url=users/store', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (response.ok) {
-                        Swal.fire('สำเร็จ!', 'บันทึกข้อมูลเรียบร้อย', 'success').then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire('ผิดพลาด!', 'เกิดข้อผิดพลาด', 'error');
-                    }
-                });
-            }
-        });
-    });
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const userItems = document.querySelectorAll('.user-item');
 
-    // Edit User
-    function editUser(id) {
-    fetch('<?= BASE_URL ?>?url=users/get&id=' + id)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('edit_id').value = data.id;
-            document.getElementById('edit_username').value = data.username;
-            document.getElementById('edit_full_name').value = data.full_name;
-            document.getElementById('edit_email').value = data.email;
-            document.getElementById('edit_is_active').checked = data.is_active == 1;
-            
-            // Set selected roles
-            const roleCheckboxes = document.querySelectorAll('#edit_roles input[type="checkbox"]');
-            roleCheckboxes.forEach(checkbox => {
-                checkbox.checked = data.roles.includes(parseInt(checkbox.value));
+            userItems.forEach(item => {
+                const username = item.dataset.username;
+                const fullname = item.dataset.fullname;
+                const email = item.dataset.email;
+
+                if (username.includes(searchTerm) || fullname.includes(searchTerm) || email.includes(searchTerm)) {
+                    item.style.display = 'table-row';
+                } else {
+                    item.style.display = 'none';
+                }
             });
-            
-            new bootstrap.Modal(document.getElementById('editModal')).show();
         });
-    }
 
-    document.getElementById('editForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        Swal.fire({
-            title: 'ยืนยันการแก้ไข',
-            text: 'ต้องการบันทึกการแก้ไขหรือไม่?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'บันทึก',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const formData = new FormData(this);
-                
-                fetch('<?= BASE_URL ?>?url=users/update', {
+        // Status filter
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            const status = this.value;
+            const userItems = document.querySelectorAll('.user-item');
+
+            userItems.forEach(item => {
+                if (status === '' || item.dataset.status === status) {
+                    item.style.display = 'table-row';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Create user form
+        document.getElementById('createForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('?url=users/create', {
                     method: 'POST',
                     body: formData
                 })
                 .then(response => {
-                    if (response.ok) {
-                        Swal.fire('สำเร็จ!', 'แก้ไขข้อมูลเรียบร้อย', 'success').then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        Swal.fire('ผิดพลาด!', 'เกิดข้อผิดพลาด', 'error');
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
+                    return response.text();
+                })
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'สำเร็จ!',
+                                text: 'เพิ่มผู้ใช้สำเร็จ',
+                                timer: 1500
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด!',
+                                text: data.message || 'ไม่สามารถเพิ่มผู้ใช้ได้'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Response:', text);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'เกิดข้อผิดพลาด!',
+                            text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด!',
+                        text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                    });
                 });
-            }
         });
-    });
 
-    // Delete User
-    function deleteUser(id) {
-        Swal.fire({
-            title: 'ยืนยันการลบ',
-            text: 'ต้องการลบผู้ใช้นี้หรือไม่? การดำเนินการนี้ไม่สามารถยกเลิกได้',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'ลบ',
-            cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '<?= BASE_URL ?>?url=users/delete&id=' + id;
-            }
+        // Edit user function
+        function editUser(id) {
+            fetch(`?url=users/get&id=${id}`)
+                .then(response => response.text())
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        if (data.success) {
+                            const user = data.user;
+                            document.getElementById('edit_id').value = user.id;
+                            document.getElementById('edit_username').value = user.username;
+                            document.getElementById('edit_full_name').value = user.full_name;
+                            document.getElementById('edit_email').value = user.email;
+                            document.getElementById('edit_is_active').checked = user.is_active == 1;
+
+                            // Set roles
+                            const roleCheckboxes = document.querySelectorAll('#editModal input[name="roles[]"]');
+                            roleCheckboxes.forEach(checkbox => {
+                                checkbox.checked = user.roles.includes(parseInt(checkbox.value));
+                            });
+
+                            new bootstrap.Modal(document.getElementById('editModal')).show();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด!',
+                                text: 'ไม่สามารถโหลดข้อมูลผู้ใช้ได้'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Response:', text);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'เกิดข้อผิดพลาด!',
+                            text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด!',
+                        text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                    });
+                });
+        }
+
+        // Edit form submit
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('?url=users/update', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'สำเร็จ!',
+                                text: 'แก้ไขผู้ใช้สำเร็จ',
+                                timer: 1500
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด!',
+                                text: data.message || 'ไม่สามารถแก้ไขผู้ใช้ได้'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Response:', text);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'เกิดข้อผิดพลาด!',
+                            text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด!',
+                        text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                    });
+                });
         });
-    }
+
+        // Delete user function
+        function deleteUser(id) {
+            Swal.fire({
+                title: 'คุณแน่ใจหรือไม่?',
+                text: 'การลบผู้ใช้นี้ไม่สามารถย้อนกลับได้!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ใช่, ลบเลย!',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`?url=users/delete&id=${id}`, {
+                            method: 'POST'
+                        })
+                        .then(response => response.text())
+                        .then(text => {
+                            try {
+                                const data = JSON.parse(text);
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'ลบสำเร็จ!',
+                                        text: 'ลบผู้ใช้สำเร็จแล้ว',
+                                        timer: 1500
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'เกิดข้อผิดพลาด!',
+                                        text: data.message || 'ไม่สามารถลบผู้ใช้ได้'
+                                    });
+                                }
+                            } catch (error) {
+                                console.error('Response:', text);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'เกิดข้อผิดพลาด!',
+                                    text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด!',
+                                text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+                            });
+                        });
+                }
+            });
+        }
+        
+        // Change per page function
+        function changePerPage(perPage) {
+            const url = new URL(window.location);
+            url.searchParams.set('per_page', perPage);
+            url.searchParams.set('page', 1);
+            window.location.href = url.toString();
+        }
     </script>
 </body>
 

@@ -11,42 +11,7 @@
         
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= BASE_URL ?>?url=dashboard">
-                        <i class="fas fa-home me-1"></i>หน้าหลัก
-                    </a>
-                </li>
-                
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <?php 
-                    $userModel = new User();
-                    $userPermissions = array_column($userModel->getUserPermissions($_SESSION['user_id']), 'name');
-                    ?>
-                    
-                    <?php if (in_array('user.view', $userPermissions)): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>?url=users">
-                            <i class="fas fa-users me-1"></i>จัดการผู้ใช้
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('role.view', $userPermissions)): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>?url=roles">
-                            <i class="fas fa-user-tag me-1"></i>จัดการบทบาท
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('system.admin', $userPermissions)): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>?url=settings">
-                            <i class="fas fa-cog me-1"></i>ตั้งค่าระบบ
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                <?php endif; ?>
+                <?php echo MenuHelper::renderMenu(); ?>
             </ul>
             
             <div class="navbar-nav">

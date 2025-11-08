@@ -42,19 +42,32 @@
                         <?php endif; ?>
 
                         <?php
-                        $table = ServerSideTable::create(
+                        require_once 'helpers/UniversalTable.php';
+                        require_once 'helpers/TableFilterHelper.php';
+                        
+                        $filterHelper = TableFilterHelper::create()
+                            ->addFilter('is_active', 'สถานะ', ['1' => 'เปิดใช้งาน', '0' => 'ปิดใช้งาน'], 'select')
+                            ->addSort('name', 'ชื่อบทบาท', true)
+                            ->addSort('display_name', 'ชื่อแสดง')
+                            ->addSort('created_at', 'วันที่สร้าง')
+                            ->addSearchField('name')
+                            ->addSearchField('display_name')
+                            ->addSearchField('description');
+                        
+                        $table = UniversalTable::create(
                             $roles, 
                             $currentPage, 
                             $perPage, 
                             $totalRecords
                         )
-                            ->addColumn('id', 'ID')
+                            ->setTitle('จัดการบทบาท', 'จัดการบทบาทและสิทธิ์การเข้าถึง')
+                            ->setTheme('classic')
+                            ->setFilterHelper($filterHelper)
+                            ->addColumn('id', 'ID', ['width' => '60px'])
                             ->addColumn('name', 'ชื่อบทบาท')
                             ->addColumn('display_name', 'ชื่อแสดง')
                             ->addColumn('description', 'คำอธิบาย')
-                            ->addColumn('is_active', 'สถานะ', function($value) {
-                                return $value ? '<span class="badge bg-success">เปิดใช้งาน</span>' : '<span class="badge bg-danger">ปิดใช้งาน</span>';
-                            })
+                            ->addColumn('is_active', 'สถานะ')
                             ->addAction('จัดการสิทธิ์', 'javascript:managePermissions({id})', 'btn-info', 'fas fa-key')
                             ->addAction('แก้ไข', 'javascript:editRole({id})', 'btn-warning', 'fas fa-edit')
                             ->addAction('ลบ', 'javascript:deleteRole({id})', 'btn-danger', 'fas fa-trash');
