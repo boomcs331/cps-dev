@@ -381,4 +381,180 @@ class Material extends Model
             ],
         ];
     }
+
+    public function getMaterialReceipts(int $page = 1, int $perPage = 10): array
+    {
+        $offset = ($page - 1) * $perPage;
+        
+        $sql = "
+            SELECT mr.id, mr.receipt_no, mr.receipt_date, mr.supplier_name, mr.created_at,
+                   mri.received_qty, mri.total_box_count, m.material_code,
+                   COALESCE(mn.name, 'N/A') as material_name, l.location_name
+            FROM material_receipts mr
+            LEFT JOIN material_receipt_items mri ON mr.id = mri.receipt_id
+            LEFT JOIN materials m ON mri.material_id = m.material_id
+            LEFT JOIN material_names mn ON m.material_id = mn.material_id 
+                AND mn.language_code = 'th' AND mn.is_primary = 1
+            LEFT JOIN locations l ON mr.location_id = l.location_id
+            ORDER BY mr.receipt_date DESC, mr.created_at DESC
+            LIMIT ? OFFSET ?
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$perPage, $offset]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getTotalMaterialReceipts(): int
+    {
+        $sql = "SELECT COUNT(*) as total FROM material_receipts";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)($result['total'] ?? 0);
+    }
+
+    public function getMaterialReceiptsWithFilters(int $page = 1, int $perPage = 10): array
+    {
+        require_once 'helpers/TableFilterHelper.php';
+        
+        $filterHelper = TableFilterHelper::create()
+            ->addSearchField('mr.receipt_no')
+            ->addSearchField('mr.supplier_name')
+            ->addSearchField('m.material_code')
+            ->addSearchField('mn.name');
+        
+        $offset = ($page - 1) * $perPage;
+        
+        $baseQuery = "
+            SELECT mr.id, mr.receipt_no, mr.receipt_date, mr.supplier_name, mr.created_at,
+                   mri.received_qty, mri.total_box_count, m.material_code,
+                   COALESCE(mn.name, 'N/A') as material_name, l.location_name
+            FROM material_receipts mr
+            LEFT JOIN material_receipt_items mri ON mr.id = mri.receipt_id
+            LEFT JOIN materials m ON mri.material_id = m.material_id
+            LEFT JOIN material_names mn ON m.material_id = mn.material_id 
+                AND mn.language_code = 'th' AND mn.is_primary = 1
+            LEFT JOIN locations l ON mr.location_id = l.location_id
+        ";
+        
+        $whereClause = $filterHelper->buildWhereClause($baseQuery);
+        $orderClause = $filterHelper->buildOrderClause() ?: ' ORDER BY mr.receipt_date DESC, mr.created_at DESC';
+        
+        $sql = $baseQuery . $whereClause['query'] . $orderClause . " LIMIT ? OFFSET ?";
+        
+        $params = array_merge($whereClause['params'], [$perPage, $offset]);
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getTotalMaterialReceiptsWithFilters(): int
+    {
+        require_once 'helpers/TableFilterHelper.php';
+        
+        $filterHelper = TableFilterHelper::create()
+            ->addSearchField('mr.receipt_no')
+            ->addSearchField('mr.supplier_name')
+            ->addSearchField('m.material_code')
+            ->addSearchField('mn.name');
+        
+        $baseQuery = "
+            SELECT COUNT(DISTINCT mr.id) as total
+            FROM material_receipts mr
+            LEFT JOIN material_receipt_items mri ON mr.id = mri.receipt_id
+            LEFT JOIN materials m ON mri.material_id = m.material_id
+            LEFT JOIN material_names mn ON m.material_id = mn.material_id 
+                AND mn.language_code = 'th' AND mn.is_primary = 1
+            LEFT JOIN locations l ON mr.location_id = l.location_id
+        ";
+        
+        $whereClause = $filterHelper->buildWhereClause($baseQuery);
+        $sql = $baseQuery . $whereClause['query'];
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($whereClause['params']);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int)($result['total'] ?? 0);
+    }
+
+    public function createMaterialReceipt(array $receiptData): array
+    {
+        if (empty($receiptData['receipt_date']) || empty($receiptData['supplier_name']) || empty($receiptData['material_id']) || empty($receiptData['quantity'])) {
+            throw new Exception('กรุณากรอกข้อมูลให้ครบถ้วน');
+        }
+
+        try {
+            $this->db->beginTransaction();
+            
+            // Ensure location exists
+            $this->db->exec("INSERT IGNORE INTO locations (location_code, location_name) VALUES ('RM-A', 'คลังวัตถุดิบ A')");
+            $stmt = $this->db->prepare("SELECT location_id FROM locations WHERE location_code = 'RM-A'");
+            $stmt->execute();
+            $locationId = $stmt->fetchColumn();
+
+            // Get material packing info
+            $stmt = $this->db->prepare("SELECT packing_qty FROM materials WHERE material_id = ?");
+            $stmt->execute([$receiptData['material_id']]);
+            $material = $stmt->fetch();
+            $packingQty = $material['packing_qty'] ?? 1;
+
+            $receiptNo = !empty($receiptData['reference_no']) ? $receiptData['reference_no'] : 'RCP-' . date('Ymd') . '-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
+            
+            // Insert receipt header
+            $stmt = $this->db->prepare("INSERT INTO material_receipts (receipt_no, receipt_date, supplier_name, location_id, created_by) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$receiptNo, $receiptData['receipt_date'], $receiptData['supplier_name'], $locationId, $receiptData['created_by'] ?? null]);
+            $receiptId = $this->db->lastInsertId();
+
+            // Calculate packing details
+            $receivedQty = (int)$receiptData['quantity'];
+            $fullBoxCount = intval($receivedQty / $packingQty);
+            $partialBoxQty = $receivedQty % $packingQty;
+            $totalBoxCount = $fullBoxCount + ($partialBoxQty > 0 ? 1 : 0);
+            $lotNo = 'LOT-' . date('Ymd') . '-' . str_pad(rand(1, 99), 2, '0', STR_PAD_LEFT);
+
+            // Insert receipt item
+            $stmt = $this->db->prepare("INSERT INTO material_receipt_items (receipt_id, material_id, received_qty, packing_qty, full_box_count, partial_box_qty, total_box_count, lot_no, location_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$receiptId, $receiptData['material_id'], $receivedQty, $packingQty, $fullBoxCount, $partialBoxQty, $totalBoxCount, $lotNo, $locationId]);
+            $receiptItemId = $this->db->lastInsertId();
+
+            // Generate QR codes for each box
+            $qrCodes = [];
+            for ($i = 1; $i <= $totalBoxCount; $i++) {
+                $qrCode = $lotNo . '-BOX-' . str_pad($i, 3, '0', STR_PAD_LEFT);
+                $packSize = ($i <= $fullBoxCount) ? $packingQty : $partialBoxQty;
+                
+                $stmt = $this->db->prepare("INSERT INTO material_stock_lots (receipt_item_id, material_id, location_id, lot_no, pack_no, pack_size, qr_code, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'AVAILABLE')");
+                $stmt->execute([$receiptItemId, $receiptData['material_id'], $locationId, $lotNo, $i, $packSize, $qrCode]);
+                
+                $qrCodes[] = [
+                    'qr_code' => $qrCode,
+                    'pack_no' => $i,
+                    'pack_size' => $packSize
+                ];
+            }
+
+            $this->db->commit();
+            return [
+                'receipt_id' => $receiptId,
+                'receipt_no' => $receiptNo,
+                'qr_codes' => $qrCodes
+            ];
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
+    public function deleteMaterialReceipt(int $receiptId): bool
+    {
+        if ($receiptId <= 0) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare("DELETE FROM material_receipts WHERE id = ?");
+        return $stmt->execute([$receiptId]);
+    }
 }

@@ -18,14 +18,23 @@ class MaterialController extends Controller
         $page = (int)($_GET['page'] ?? 1);
         $perPage = (int)($_GET['per_page'] ?? 10);
         
+        $receiptPage = (int)($_GET['receipt_page'] ?? 1);
+        $receiptPerPage = (int)($_GET['receipt_per_page'] ?? 10);
+        
         $materials = $this->materialModel->getMaterialsWithFilters($page, $perPage);
         $totalRecords = $this->materialModel->getTotalMaterialsWithFilters();
+        $receipts = $this->materialModel->getMaterialReceiptsWithFilters($receiptPage, $receiptPerPage);
+        $totalReceiptRecords = $this->materialModel->getTotalMaterialReceiptsWithFilters();
         
         $data = [
             'materials' => $materials,
+            'receipts' => $receipts,
             'currentPage' => $page,
             'perPage' => $perPage,
             'totalRecords' => $totalRecords,
+            'receiptCurrentPage' => $receiptPage,
+            'receiptPerPage' => $receiptPerPage,
+            'totalReceiptRecords' => $totalReceiptRecords,
             'units' => $this->materialModel->getUnits(),
             'locations' => $this->materialModel->getLocations(),
             'username' => $_SESSION['full_name'] ?? 'ผู้ใช้งาน',
@@ -164,5 +173,97 @@ class MaterialController extends Controller
             $this->json(['success' => false, 'message' => $e->getMessage()]);
         }
 
+    }
+
+    public function receipt()
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        $page = (int)($_GET['page'] ?? 1);
+        $perPage = (int)($_GET['per_page'] ?? 10);
+        
+        $receipts = $this->materialModel->getMaterialReceiptsWithFilters($page, $perPage);
+        $totalRecords = $this->materialModel->getTotalMaterialReceiptsWithFilters();
+        $materials = $this->materialModel->getMaterialsWithRelations();
+        
+        $data = [
+            'receipts' => $receipts,
+            'currentPage' => $page,
+            'perPage' => $perPage,
+            'totalRecords' => $totalRecords,
+            'materials' => $materials,
+            'username' => $_SESSION['full_name'] ?? 'ผู้ใช้งาน',
+        ];
+
+        $this->view('materials/receipt/index', $data);
+    }
+
+    public function storeReceipt()
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        if (!$this->isPost()) {
+            http_response_code(405);
+            $this->json(['success' => false, 'message' => 'รูปแบบคำขอไม่ถูกต้อง']);
+        }
+
+        $payload = [
+            'receipt_date' => $this->getPost('receipt_date'),
+            'material_id' => (int)$this->getPost('material_id'),
+            'quantity' => (int)$this->getPost('quantity'),
+            'supplier_name' => trim((string)$this->getPost('supplier_name')),
+            'reference_no' => trim((string)$this->getPost('reference_no')),
+            'created_by' => $_SESSION['user_id'] ?? null,
+        ];
+
+        try {
+            $result = $this->materialModel->createMaterialReceipt($payload);
+            $this->json(['success' => true, 'data' => $result]);
+        } catch (Exception $e) {
+            $this->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function deleteReceipt()
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        if (!$this->isPost()) {
+            http_response_code(405);
+            $this->json(['success' => false, 'message' => 'รูปแบบคำขอไม่ถูกต้อง']);
+        }
+
+        $receiptId = (int)($this->getPost('receipt_id') ?? 0);
+        if ($receiptId <= 0) {
+            http_response_code(400);
+            $this->json(['success' => false, 'message' => 'รหัสรายการไม่ถูกต้อง']);
+        }
+
+        try {
+            $result = $this->materialModel->deleteMaterialReceipt($receiptId);
+            $this->json(['success' => (bool)$result]);
+        } catch (Exception $e) {
+            $this->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function issue()
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        $data = [
+            'issues' => [],
+            'totalRecords' => 0,
+            'currentPage' => 1,
+            'perPage' => 10,
+            'materials' => $this->materialModel->getAllMaterials(),
+            'username' => $_SESSION['full_name'] ?? 'ผู้ใช้งาน',
+        ];
+
+        $this->view('materials/issue/index', $data);
     }
 }
