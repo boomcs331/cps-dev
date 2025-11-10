@@ -54,22 +54,21 @@ class MenuHelper
         return $html;
     }
 
-    public static function getAccessibleMenuItems()
+    public static function getAccessibleMenuItems($userRoles = [])
     {
-        return [
+        // Get roles from session if not provided
+        if (empty($userRoles) && isset($_SESSION['roles'])) {
+            $userRoles = $_SESSION['roles'];
+        }
+        
+        $allMenus = [
             [
                 'title' => 'Part Control',
                 'subtitle' => 'ติดตามสถานะ Part Control',
                 'icon' => 'fas fa-industry',
                 'type' => 'link',
                 'url' => BASE_URL . 'pc',
-            ],
-            [
-                'title' => 'จัดการวัสดุ',
-                'subtitle' => 'จัดการข้อมูลวัสดุในระบบ',
-                'icon' => 'fas fa-boxes',
-                'type' => 'link',
-                'url' => BASE_URL . 'materials',
+                'required_roles' => ['pc', 'admin']
             ],
             [
                 'title' => 'จัดการผู้ใช้',
@@ -77,6 +76,7 @@ class MenuHelper
                 'icon' => 'fas fa-users',
                 'type' => 'link',
                 'url' => BASE_URL . 'users',
+                'required_roles' => ['admin']
             ],
             [
                 'title' => 'จัดการบทบาท',
@@ -84,6 +84,7 @@ class MenuHelper
                 'icon' => 'fas fa-user-tag',
                 'type' => 'link',
                 'url' => BASE_URL . 'roles',
+                'required_roles' => ['admin']
             ],
             [
                 'title' => 'จัดการสิทธิ์',
@@ -91,6 +92,7 @@ class MenuHelper
                 'icon' => 'fas fa-key',
                 'type' => 'link',
                 'url' => BASE_URL . 'permissions',
+                'required_roles' => ['admin']
             ],
             [
                 'title' => 'รายงาน',
@@ -98,7 +100,20 @@ class MenuHelper
                 'icon' => 'fas fa-chart-bar',
                 'type' => 'link',
                 'url' => BASE_URL . 'reports',
+                'required_roles' => ['admin', 'manager']
             ]
         ];
+
+        return array_filter($allMenus, function($menu) use ($userRoles) {
+            return !empty(array_intersect($userRoles, $menu['required_roles']));
+        });
+    }
+
+    public static function hasAccess($requiredRoles, $userRoles = [])
+    {
+        if (empty($userRoles) && isset($_SESSION['roles'])) {
+            $userRoles = $_SESSION['roles'];
+        }
+        return !empty(array_intersect($userRoles, $requiredRoles));
     }
 }

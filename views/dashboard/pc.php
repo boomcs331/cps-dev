@@ -154,39 +154,7 @@ $maxWeeklyValue = $maxWeeklyValue ?: 1;
                 </div>
             </header>
 
-            <?php if (!empty($menuItems)): ?>
-                <section class="menu-section">
-                    <div class="menu-header">
-                        <h2>เมนูที่สามารถเข้าถึงได้</h2>
-                        <p>เลือกจัดการโมดูลที่คุณมีสิทธิ์เข้าถึงได้อย่างรวดเร็ว</p>
-                    </div>
-                    <div class="menu-grid">
-                        <?php foreach ($menuItems as $item): ?>
-                            <?php if ($item['type'] === 'link'): ?>
-                                <a class="menu-card" href="<?= htmlspecialchars($item['url']) ?>">
-                                    <div class="menu-card-icon">
-                                        <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
-                                    </div>
-                                    <div class="menu-card-text">
-                                        <h3><?= htmlspecialchars($item['title']) ?></h3>
-                                        <p><?= htmlspecialchars($item['subtitle']) ?></p>
-                                    </div>
-                                </a>
-                            <?php elseif ($item['type'] === 'modal'): ?>
-                                <button type="button" class="menu-card menu-card-button" data-bs-toggle="modal" data-bs-target="<?= htmlspecialchars($item['target']) ?>">
-                                    <div class="menu-card-icon">
-                                        <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
-                                    </div>
-                                    <div class="menu-card-text">
-                                        <h3><?= htmlspecialchars($item['title']) ?></h3>
-                                        <p><?= htmlspecialchars($item['subtitle']) ?></p>
-                                    </div>
-                                </button>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </div>
-                </section>
-            <?php endif; ?>
+
 
             <section class="kpi-grid">
                 <?php foreach ($kpiCards as $card): ?>

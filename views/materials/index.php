@@ -26,14 +26,14 @@ $materials = $materials ?? [];
 
         <div class="dashboard-container">
             <!-- Tab Navigation -->
-            <div class="modern-tabs-container mb-4" >
+            <div class="modern-tabs-container mb-4">
                 <div class="modern-tabs">
                     <button class="modern-tab active" id="materials-tab" data-bs-toggle="tab" data-bs-target="#materials" type="button" role="tab">
                         <div class="tab-icon">
                             <i class="fas fa-boxes"></i>
                         </div>
                         <div class="tab-content">
-                            <h6 class="tab-title">จัดการวัตถุดิบ</h6>
+                            <h6 class="tab-title">รายการวัตถุดิบ</h6>
                             <p class="tab-desc">ข้อมูลและสต็อกวัตถุดิบ</p>
                         </div>
                         <div class="tab-indicator"></div>
@@ -76,151 +76,85 @@ $materials = $materials ?? [];
                 <div class="tab-pane fade show active" id="materials" role="tabpanel">
                     <!-- Stats Cards -->
                     <section class="kpi-grid">
-                <article class="kpi-card">
-                    <h3>วัตถุดิบทั้งหมด</h3>
-                    <strong><?= count($materials) ?></strong>
-                    <span class="kpi-trend neutral">รายการ</span>
-                </article>
-                <article class="kpi-card">
-                    <h3>วัตถุดิบที่ใช้งาน</h3>
-                    <strong><?= count(array_filter($materials, fn($m) => $m['is_active'] == 1)) ?></strong>
-                    <span class="kpi-trend up">พร้อมใช้งาน</span>
-                </article>
-                <article class="kpi-card">
-                    <h3>คลังทั้งหมด</h3>
-                    <strong><?= count($locations ?? []) ?></strong>
-                    <span class="kpi-trend neutral">สถานที่</span>
-                </article>
-                <article class="kpi-card">
-                    <h3>หน่วยนับ</h3>
-                    <strong><?= count($units ?? []) ?></strong>
-                    <span class="kpi-trend neutral">ประเภท</span>
-                </article>
-            </section>
+                        <article class="kpi-card">
+                            <h3>วัตถุดิบทั้งหมด</h3>
+                            <strong><?= count($materials) ?></strong>
+                            <span class="kpi-trend neutral">รายการ</span>
+                        </article>
+                        <article class="kpi-card">
+                            <h3>วัตถุดิบที่ใช้งาน</h3>
+                            <strong><?= count(array_filter($materials, fn($m) => $m['is_active'] == 1)) ?></strong>
+                            <span class="kpi-trend up">พร้อมใช้งาน</span>
+                        </article>
+                        <article class="kpi-card">
+                            <h3>คลังทั้งหมด</h3>
+                            <strong><?= count($locations ?? []) ?></strong>
+                            <span class="kpi-trend neutral">สถานที่</span>
+                        </article>
+                        <article class="kpi-card">
+                            <h3>หน่วยนับ</h3>
+                            <strong><?= count($units ?? []) ?></strong>
+                            <span class="kpi-trend neutral">ประเภท</span>
+                        </article>
+                    </section>
 
-            <!-- Materials Table -->
-            <section class="card">
-                <div class="table-responsive">
-                    <table class="table" id="materialsTable">
-                        <thead>
-                            <tr>
-                                <th>รหัส</th>
-                                <th>ชื่อวัตถุดิบ</th>
-                                <th>หน่วย</th>
-                                <th>คลัง</th>
-                                <th>สถานะ</th>
-                                <th>จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($materials as $material): ?>
-                                <tr class="material-item">
-                                    <td><code class="code-badge"><?= htmlspecialchars($material['material_code']) ?></code></td>
-                                    <td>
-                                        <div>
-                                            <strong><?= htmlspecialchars($material['material_name']) ?></strong><br>
-                                            <?php if (!empty($material['description'])): ?>
-                                                <small class="text-muted"><?= htmlspecialchars($material['description']) ?></small>
-                                            <?php endif; ?>
-                                        </div>
-                                    </td>
-                                    <td><?= htmlspecialchars($material['unit_name'] ?? 'N/A') ?></td>
-                                    <td><?= htmlspecialchars($material['location_name'] ?? 'N/A') ?></td>
-                                    <td>
-                                        <span class="badge <?= $material['is_active'] === 'ใช้งาน' ? 'info' : 'warning' ?>">
-                                            <?= htmlspecialchars($material['is_active']) ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div style="display: flex; gap: 4px;">
-                                            <button class="btn btn-warning btn-sm" onclick="editMaterial(<?= $material['id'] ?>)" title="แก้ไข">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-danger btn-sm" onclick="deleteMaterial(<?= $material['id'] ?>)" title="ลบ">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="card" style="margin-top: 24px;">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="text-muted">
-                                แสดง <?= (($currentPage - 1) * $perPage) + 1 ?> - <?= min($currentPage * $perPage, $totalRecords) ?> จาก <?= number_format($totalRecords) ?> รายการ
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="text-muted">แสดงต่อหน้า:</span>
-                                <select class="form-select form-select-sm" style="width: auto;" onchange="changePerPage(this.value)">
-                                    <option value="10" <?= $perPage == 10 ? 'selected' : '' ?>>10</option>
-                                    <option value="25" <?= $perPage == 25 ? 'selected' : '' ?>>25</option>
-                                    <option value="50" <?= $perPage == 50 ? 'selected' : '' ?>>50</option>
-                                    <option value="100" <?= $perPage == 100 ? 'selected' : '' ?>>100</option>
-                                </select>
-                            </div>
+                    <!-- Materials Table -->
+                    <section class="card">
+                        <div class="table-responsive">
+                            <table class="table" id="materialsTable">
+                                <thead>
+                                    <tr>
+                                        <th>รหัส</th>
+                                        <th>ชื่อวัตถุดิบ</th>
+                                        <th>หน่วย</th>
+                                        <th>คลัง</th>
+                                        <th>สถานะ</th>
+                                        <th>จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($materials as $material): ?>
+                                        <tr class="material-item">
+                                            <td><code class="code-badge"><?= htmlspecialchars($material['material_code']) ?></code></td>
+                                            <td>
+                                                <div>
+                                                    <strong><?= htmlspecialchars($material['material_name']) ?></strong><br>
+                                                    <?php if (!empty($material['description'])): ?>
+                                                        <small class="text-muted"><?= htmlspecialchars($material['description']) ?></small>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td><?= htmlspecialchars($material['unit_name'] ?? 'N/A') ?></td>
+                                            <td><?= htmlspecialchars($material['location_name'] ?? 'N/A') ?></td>
+                                            <td>
+                                                <span class="badge <?= $material['is_active'] === 'ใช้งาน' ? 'info' : 'warning' ?>">
+                                                    <?= htmlspecialchars($material['is_active']) ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn btn-warning" onclick="editMaterial(<?= $material['id'] ?>)" title="แก้ไข">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-danger" onclick="deleteMaterial(<?= $material['id'] ?>)" title="ลบ">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
                         </div>
-                        
-                    <?php 
-                    $totalPages = ceil($totalRecords / $perPage);
-                    if ($totalPages > 1): 
-                    ?>
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center mb-0">
-                            <?php if ($currentPage > 2): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?url=materials&page=1&per_page=<?= $perPage ?>" title="หน้าแรก">
-                                        <i class="fas fa-angle-double-left"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            
-                            <?php if ($currentPage > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?url=materials&page=<?= $currentPage - 1 ?>&per_page=<?= $perPage ?>" title="หน้าก่อนหน้า">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
 
-                            <?php
-                            $start = max(1, $currentPage - 2);
-                            $end = min($totalPages, $currentPage + 2);
-                            
-                            for ($i = $start; $i <= $end; $i++):
-                            ?>
-                                <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
-                                    <a class="page-link" href="?url=materials&page=<?= $i ?>&per_page=<?= $perPage ?>"><?= $i ?></a>
-                                </li>
-                            <?php endfor; ?>
+                        <!-- Pagination -->
+                        <?php
+                        require_once 'helpers/PaginationHelper.php';
+                        echo PaginationHelper::render($currentPage, $totalRecords, $perPage);
+                        ?>
+                    </section>
+                </div>
 
-                            <?php if ($currentPage < $totalPages): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?url=materials&page=<?= $currentPage + 1 ?>&per_page=<?= $perPage ?>" title="หน้าถัดไป">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            
-                            <?php if ($currentPage < $totalPages - 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?url=materials&page=<?= $totalPages ?>&per_page=<?= $perPage ?>" title="หน้าสุดท้าย">
-                                        <i class="fas fa-angle-double-right"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                    </nav>
-                    <?php endif; ?>
-                    </div>
-                </div>
-            </section>
-                </div>
-                
                 <!-- Transactions Tab -->
                 <div class="tab-pane fade" id="transactions" role="tabpanel">
                     <section class="card">
@@ -231,7 +165,7 @@ $materials = $materials ?? [];
                         </div>
                     </section>
                 </div>
-                
+
                 <!-- Work Orders Tab -->
                 <div class="tab-pane fade" id="workorders" role="tabpanel">
                     <section class="card">
@@ -242,7 +176,7 @@ $materials = $materials ?? [];
                         </div>
                     </section>
                 </div>
-                
+
                 <!-- Reports Tab -->
                 <div class="tab-pane fade" id="reports" role="tabpanel">
                     <section class="card">
@@ -538,7 +472,7 @@ $materials = $materials ?? [];
                 }
             });
         }
-        
+
         // Change per page function
         function changePerPage(perPage) {
             const url = new URL(window.location);
@@ -546,35 +480,35 @@ $materials = $materials ?? [];
             url.searchParams.set('page', 1);
             window.location.href = url.toString();
         }
-        
+
         // Tab switching functionality
         document.querySelectorAll('.modern-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 // Remove active class from all tabs
                 document.querySelectorAll('.modern-tab').forEach(t => t.classList.remove('active'));
-                
+
                 // Add active class to clicked tab
                 this.classList.add('active');
-                
+
                 // Handle Bootstrap tab functionality
                 const targetId = this.getAttribute('data-bs-target');
                 document.querySelectorAll('.tab-pane').forEach(pane => {
                     pane.classList.remove('show', 'active');
                 });
-                
+
                 const targetPane = document.querySelector(targetId);
                 if (targetPane) {
                     targetPane.classList.add('show', 'active');
                 }
             });
         });
-        
+
         // Tab switching functionality
         document.querySelectorAll('.modern-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 // Remove active class from all tabs
                 document.querySelectorAll('.modern-tab').forEach(t => t.classList.remove('active'));
-                
+
                 // Add active class to clicked tab
                 this.classList.add('active');
             });

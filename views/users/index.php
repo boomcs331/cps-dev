@@ -150,77 +150,10 @@
                 </div>
             </section>
 
-            <!-- Pagination -->
-            <div class="card" style="margin-top: 24px;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="text-muted">
-                            แสดง <?= (($currentPage - 1) * $perPage) + 1 ?> - <?= min($currentPage * $perPage, $totalRecords) ?> จาก <?= number_format($totalRecords) ?> รายการ
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="text-muted">แสดงต่อหน้า:</span>
-                            <select class="form-select form-select-sm" style="width: auto;" onchange="changePerPage(this.value)">
-                                <option value="10" <?= $perPage == 10 ? 'selected' : '' ?>>10</option>
-                                <option value="25" <?= $perPage == 25 ? 'selected' : '' ?>>25</option>
-                                <option value="50" <?= $perPage == 50 ? 'selected' : '' ?>>50</option>
-                                <option value="100" <?= $perPage == 100 ? 'selected' : '' ?>>100</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <?php 
-                    $totalPages = ceil($totalRecords / $perPage);
-                    if ($totalPages > 1): 
-                    ?>
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center mb-0">
-                            <?php if ($currentPage > 2): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=1&per_page=<?= $perPage ?>" title="หน้าแรก">
-                                        <i class="fas fa-angle-double-left"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            
-                            <?php if ($currentPage > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?= $currentPage - 1 ?>&per_page=<?= $perPage ?>" title="หน้าก่อนหน้า">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-
-                            <?php
-                            $start = max(1, $currentPage - 2);
-                            $end = min($totalPages, $currentPage + 2);
-                            
-                            for ($i = $start; $i <= $end; $i++):
-                            ?>
-                                <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
-                                    <a class="page-link" href="?page=<?= $i ?>&per_page=<?= $perPage ?>"><?= $i ?></a>
-                                </li>
-                            <?php endfor; ?>
-
-                            <?php if ($currentPage < $totalPages): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?= $currentPage + 1 ?>&per_page=<?= $perPage ?>" title="หน้าถัดไป">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            
-                            <?php if ($currentPage < $totalPages - 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?= $totalPages ?>&per_page=<?= $perPage ?>" title="หน้าสุดท้าย">
-                                        <i class="fas fa-angle-double-right"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                    </nav>
-                    <?php endif; ?>
-                </div>
-            </div>
+            <?php 
+            require_once 'helpers/PaginationHelper.php';
+            echo PaginationHelper::render($currentPage, $totalRecords, $perPage);
+            ?>
         </div>
     </div>
 

@@ -149,23 +149,6 @@ $maxWeeklyValue = $maxWeeklyValue ?: 1;
         <?php include 'views/layouts/navbar-mazer.php'; ?>
 
         <div class="dashboard-container">
-            <header class="dashboard-hero">
-                <h1>แดชบอร์ดการผลิต</h1>
-                <p>ภาพรวมกำลังการผลิต สถานะสายการผลิต และแจ้งเตือนสำคัญประจำวัน</p>
-                <div class="actions-bar">
-                    <div class="actions">
-                        <a class="button-link" href="<?= BASE_URL ?>?url=reports/daily">
-                            <i class="fas fa-file-alt"></i> รายงานประจำวัน
-                        </a>
-                        <a class="button-link secondary" href="<?= BASE_URL ?>?url=production/planner">
-                            <i class="fas fa-calendar-alt"></i> วางแผนการผลิต
-                        </a>
-                    </div>
-                    <a class="button-link" href="#" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                        <i class="fas fa-user-plus"></i> เพิ่มผู้ใช้งาน
-                    </a>
-                </div>
-            </header>
 
             <?php if (!empty($menuItems)): ?>
                 <section class="menu-section">

@@ -334,6 +334,76 @@ class TableFilterHelper {
         .sorted .sort-icon { 
             opacity: 1; 
         }
+        th {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .action-buttons {
+            display: inline-flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .action-buttons button {
+            min-width: 44px;
+            height: 38px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            padding: 8px 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+            background: #ffffff;
+            color: #1f2937;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+        }
+        .action-buttons button i {
+            font-size: 15px;
+        }
+        .action-buttons button::before {
+            content: "";
+            position: absolute;
+            inset: -40% -10%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.55), transparent 70%);
+            opacity: 0;
+            transform: scale(0.2);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .action-buttons button:hover {
+            transform: translateY(-2px) scale(1.015);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18);
+        }
+        .action-buttons button:hover::before {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .action-buttons button:active {
+            transform: translateY(0);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
+        }
+        .action-buttons .action-edit {
+            background: linear-gradient(120deg, #f0fdf4, #dcfce7);
+            border-color: #86efac;
+            color: #166534;
+        }
+        .action-buttons .action-delete {
+            background: linear-gradient(120deg, #fef2f2, #fee2e2);
+            border-color: #fca5a5;
+            color: #b91c1c;
+        }
+        td:last-child {
+            text-align: center;
+            width: 160px;
+        }
         @media (max-width: 768px) {
             .table-filters { 
                 flex-direction: column; 

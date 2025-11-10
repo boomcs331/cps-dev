@@ -1,165 +1,72 @@
+<?php
+if (isset($_SESSION['user_id'])) {
+    header('Location: ' . BASE_URL . '?url=dashboard');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เข้าสู่ระบบ - CPS</title>
-    <link href="<?= BASE_URL ?>lib/css/bootstrap.min.css" rel="stylesheet">
-    <link href="<?= BASE_URL ?>lib/fontawesome/css/all.min.css" rel="stylesheet">
-    <link href="<?= BASE_URL ?>lib/css/login-new.css" rel="stylesheet">
+    <link rel="shortcut icon" href="<?= BASE_URL ?>lib/compiled/svg/favicon.svg" type="image/x-icon">
+    <link rel="stylesheet" href="<?= BASE_URL ?>lib/compiled/css/app.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>lib/compiled/css/app-dark.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>lib/fontawesome/css/all.min.css">
 </head>
-
 <body>
-    <div class="floating-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
+    <script src="<?= BASE_URL ?>lib/static/js/initTheme.js"></script>
+    <div id="auth">
+        <div class="row h-100">
+            <div class="col-lg-5 col-12">
+                <div id="auth-left">
+                    <div class="auth-logo">
+                        <a href="<?= BASE_URL ?>"><img src="<?= BASE_URL ?>lib/compiled/jpg/logo.jpg" alt="Logo"></a>
+                    </div>
+                    <h1 class="auth-title">เข้าสู่ระบบ</h1>
+                    <p class="auth-subtitle mb-5">กรุณาเข้าสู่ระบบด้วยข้อมูลของคุณ</p>
 
-    <div class="login-card">
-        <div class="login-header">
-            <div class="logo">
-                <i class="fas fa-shield-alt"></i>
+                    <?php if (isset($_SESSION['error'])): ?>
+                        <div class="alert alert-danger alert-dismissible show fade">
+                            <div class="alert-body">
+                                <button class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                                <?= $_SESSION['error'] ?>
+                            </div>
+                        </div>
+                        <?php unset($_SESSION['error']); ?>
+                    <?php endif; ?>
+
+                    <form action="<?= BASE_URL ?>?url=auth/login" method="POST">
+                        <div class="form-group position-relative has-icon-left mb-4">
+                            <input type="text" class="form-control form-control-xl" placeholder="ชื่อผู้ใช้" name="username" required>
+                            <div class="form-control-icon">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        </div>
+                        <div class="form-group position-relative has-icon-left mb-4">
+                            <input type="password" class="form-control form-control-xl" placeholder="รหัสผ่าน" name="password" required>
+                            <div class="form-control-icon">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+                        </div>
+                        <div class="form-check form-check-lg d-flex align-items-end">
+                            <input class="form-check-input me-2" type="checkbox" value="" id="flexCheckDefault">
+                            <label class="form-check-label text-gray-600" for="flexCheckDefault">
+                                จดจำการเข้าสู่ระบบ
+                            </label>
+                        </div>
+                        <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5">เข้าสู่ระบบ</button>
+                    </form>
+                </div>
             </div>
-            <h2>ระบบจัดการ CPS</h2>
-            <p class="mb-0 opacity-75">ยินดีต้อนรับเข้าสู่ระบบ</p>
-        </div>
-
-        <div class="login-body">
-            <?php if (isset($error)): ?>
-                <div class="alert alert-danger" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <?= htmlspecialchars($error) ?>
-                </div>
-            <?php endif; ?>
-
-            <form method="POST" action="/login" id="loginForm">
-                <div class="form-floating">
-                    <i class="fas fa-user input-icon"></i>
-                    <input type="text" class="form-control" id="username" name="username"
-                        placeholder=" " required autocomplete="username">
-                    <div class="input-wave"></div>
-                    <label class="form-label">ชื่อผู้ใช้</label>
-                </div>
-
-                <div class="form-floating">
-                    <i class="fas fa-lock input-icon"></i>
-                    <input type="password" class="form-control" id="password" name="password"
-                        placeholder=" " required autocomplete="current-password">
-                    <i class="fas fa-eye toggle-password" onclick="togglePassword()"></i>
-                    <div class="input-wave"></div>
-                    <label class="form-label">รหัสผ่าน</label>
-                </div>
-
-                <button type="submit" class="btn btn-login">
-                    <i class="fas fa-sign-in-alt me-2"></i>
-                    เข้าสู่ระบบ
-                </button>
-            </form>
-
-            <div class="test-accounts">
-                <h6><i class="fas fa-users me-2"></i>บัญชีทดสอบ</h6>
-                <div class="account-item" onclick="fillLogin('admin', 'password')">
-                    <strong>admin</strong> / password <span class="badge bg-danger ms-2">Super Admin</span>
-                </div>
-                <div class="account-item" onclick="fillLogin('manager', 'password')">
-                    <strong>manager</strong> / password <span class="badge bg-warning ms-2">Manager</span>
-                </div>
-                <div class="account-item" onclick="fillLogin('user1', 'password')">
-                    <strong>user1</strong> / password <span class="badge bg-info ms-2">User</span>
+            <div class="col-lg-7 d-none d-lg-block">
+                <div id="auth-right">
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="<?= BASE_URL ?>lib/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function fillLogin(username, password) {
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-
-            // Typing animation
-            typeAnimation(usernameInput, username, () => {
-                typeAnimation(passwordInput, password, () => {
-                    // Glow effect after filling
-                    document.querySelectorAll('.form-floating').forEach(el => {
-                        el.querySelector('.form-control').classList.add('glow');
-                        setTimeout(() => {
-                            el.querySelector('.form-control').classList.remove('glow');
-                        }, 800);
-                    });
-                });
-            });
-        }
-
-        function typeAnimation(input, text, callback) {
-            input.value = '';
-            input.focus();
-            let i = 0;
-            const timer = setInterval(() => {
-                input.value += text[i];
-                i++;
-                if (i >= text.length) {
-                    clearInterval(timer);
-                    if (callback) setTimeout(callback, 200);
-                }
-            }, 80);
-        }
-
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.querySelector('.toggle-password');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
-            }
-        }
-
-        // Add input validation effects
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('invalid', function() {
-                this.parentElement.classList.add('shake');
-                setTimeout(() => {
-                    this.parentElement.classList.remove('shake');
-                }, 500);
-            });
-
-            // Handle autofill detection
-            input.addEventListener('animationstart', function(e) {
-                if (e.animationName === 'onAutoFillStart') {
-                    this.classList.add('autofilled');
-                }
-            });
-
-            input.addEventListener('input', function() {
-                if (this.value !== '') {
-                    this.classList.add('has-value');
-                } else {
-                    this.classList.remove('has-value');
-                }
-            });
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const button = this.querySelector('button[type="submit"]');
-            const originalText = button.innerHTML;
-
-            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>กำลังเข้าสู่ระบบ...';
-            button.disabled = true;
-
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }, 3000);
-        });
-    </script>
 </body>
-
 </html>
