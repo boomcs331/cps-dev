@@ -266,4 +266,29 @@ class MaterialController extends Controller
 
         $this->view('materials/issue/index', $data);
     }
+
+    public function receiptDetail($id = null)
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        $receiptId = (int)($id ?? 0);
+        if ($receiptId <= 0) {
+            header('Location: ' . BASE_URL . '?url=materials');
+            exit;
+        }
+
+        $receiptDetail = $this->materialModel->getReceiptDetail($receiptId);
+        if (!$receiptDetail) {
+            header('Location: ' . BASE_URL . '?url=materials');
+            exit;
+        }
+
+        $data = [
+            'receipt' => $receiptDetail,
+            'username' => $_SESSION['full_name'] ?? 'ผู้ใช้งาน',
+        ];
+
+        $this->view('materials/receipt/detail', $data);
+    }
 }

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug QR Code</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-item { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        canvas { border: 1px solid #000; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Debug QR Code Generator</h1>
+    
+    <div class="test-item">
+        <h3>Test 1: Simple Text</h3>
+        <canvas id="test1" width="120" height="120"></canvas>
+        <p>Text: "LOT-20250110-01-BOX-001"</p>
+    </div>
+    
+    <div class="test-item">
+        <h3>Test 2: Different Size</h3>
+        <canvas id="test2" width="200" height="200"></canvas>
+        <p>Text: "TEST-QR-CODE-123"</p>
+    </div>
+    
+    <div class="test-item">
+        <h3>Test 3: Error Handling</h3>
+        <canvas id="test3" width="150" height="150"></canvas>
+        <p>Text: "Very long text to test error handling and see what happens"</p>
+        <div id="error-log"></div>
+    </div>
+
+    <script src="lib/js/qrcode/qrcode.min.js"></script>
+    <script>
+        console.log('QRCode object:', window.QRCode);
+        
+        // Test 1
+        const canvas1 = document.getElementById('test1');
+        QRCode.toCanvas(canvas1, 'LOT-20250110-01-BOX-001', {
+            width: 120,
+            height: 120,
+            color: { dark: '#000000', light: '#FFFFFF' }
+        }, function(error) {
+            if (error) {
+                console.error('Test 1 Error:', error);
+                document.getElementById('error-log').innerHTML += '<p>Test 1 Error: ' + error.message + '</p>';
+            } else {
+                console.log('Test 1 Success');
+            }
+        });
+        
+        // Test 2
+        const canvas2 = document.getElementById('test2');
+        QRCode.toCanvas(canvas2, 'TEST-QR-CODE-123', {
+            width: 200,
+            height: 200,
+            color: { dark: '#000000', light: '#FFFFFF' }
+        }, function(error) {
+            if (error) {
+                console.error('Test 2 Error:', error);
+                document.getElementById('error-log').innerHTML += '<p>Test 2 Error: ' + error.message + '</p>';
+            } else {
+                console.log('Test 2 Success');
+            }
+        });
+        
+        // Test 3
+        const canvas3 = document.getElementById('test3');
+        QRCode.toCanvas(canvas3, 'Very long text to test error handling and see what happens', {
+            width: 150,
+            height: 150,
+            color: { dark: '#000000', light: '#FFFFFF' }
+        }, function(error) {
+            if (error) {
+                console.error('Test 3 Error:', error);
+                document.getElementById('error-log').innerHTML += '<p>Test 3 Error: ' + error.message + '</p>';
+            } else {
+                console.log('Test 3 Success');
+            }
+        });
+    </script>
+</body>
+</html>

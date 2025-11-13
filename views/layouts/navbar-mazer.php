@@ -99,12 +99,6 @@ $navCurrentSegment = explode('/', $navCurrent)[0];
             </ul>
             
             <div class="navbar-nav">
-                <div class="d-flex align-items-center me-3">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="toggle-dark">
-                        <label class="form-check-label text-white" for="toggle-dark">🌙</label>
-                    </div>
-                </div>
                 <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">

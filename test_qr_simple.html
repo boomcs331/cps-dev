@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test QR Code Library</title>
+</head>
+<body>
+    <h1>Test QR Code Library</h1>
+    
+    <div id="qrcode1"></div>
+    <p>Test 1: Simple text</p>
+    
+    <div id="qrcode2"></div>
+    <p>Test 2: LOT code</p>
+    
+    <script src="lib/js/qrcode/qrcode.min.js"></script>
+    <script>
+        console.log('QRCode available:', typeof QRCode);
+        console.log('QRCode object:', QRCode);
+        
+        try {
+            // Test 1
+            new QRCode(document.getElementById("qrcode1"), {
+                text: "Hello World",
+                width: 128,
+                height: 128
+            });
+            console.log('Test 1 success');
+        } catch (e) {
+            console.error('Test 1 error:', e);
+            document.getElementById("qrcode1").innerHTML = 'Error: ' + e.message;
+        }
+        
+        try {
+            // Test 2
+            new QRCode(document.getElementById("qrcode2"), {
+                text: "LOT-20251113-97-BOX-001",
+                width: 128,
+                height: 128,
+                colorDark: "#000000",
+                colorLight: "#ffffff"
+            });
+            console.log('Test 2 success');
+        } catch (e) {
+            console.error('Test 2 error:', e);
+            document.getElementById("qrcode2").innerHTML = 'Error: ' + e.message;
+        }
+    </script>
+</body>
+</html>

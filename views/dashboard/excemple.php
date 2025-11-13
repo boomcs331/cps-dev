@@ -1,0 +1,338 @@
+<?php
+
+$permissions = $permissions ?? ($_SESSION['permissions'] ?? []);
+if (!is_array($permissions)) {
+    $permissions = [];
+}
+
+$dashboardMetrics = $dashboardMetrics ?? [];
+
+$kpiCards = [
+    [
+        'title' => 'สินค้าทั้งหมด',
+        'value' => number_format($dashboardMetrics['total_products'] ?? 48320),
+        'trend' => $dashboardMetrics['products_trend'] ?? '+8.4% เทียบสัปดาห์ก่อน',
+        'trendType' => $dashboardMetrics['products_trend_type'] ?? 'up',
+    ],
+    [
+        'title' => 'ลูกค้าที่ใช้งาน',
+        'value' => number_format($dashboardMetrics['active_customers'] ?? 312),
+        'trend' => $dashboardMetrics['customers_trend'] ?? '+6 ลูกค้าองค์กร',
+        'trendType' => $dashboardMetrics['customers_trend_type'] ?? 'up',
+    ],
+    [
+        'title' => 'สาขา/โรงงาน',
+        'value' => number_format($dashboardMetrics['branches'] ?? 8),
+        'trend' => $dashboardMetrics['branches_meta'] ?? 'โรงงานหลัก 7 · HQ 1',
+        'trendType' => $dashboardMetrics['branches_trend_type'] ?? 'neutral',
+    ],
+    [
+        'title' => 'ผลิตเฉลี่ยต่อวัน',
+        'value' => number_format($dashboardMetrics['avg_daily_output'] ?? 7920) . ' ชิ้น',
+        'trend' => $dashboardMetrics['daily_output_trend'] ?? '103% ของเป้าหมาย',
+        'trendType' => $dashboardMetrics['daily_output_trend_type'] ?? 'up',
+    ],
+];
+
+$productBreakdown = $productBreakdown ?? [
+    ['name' => 'ระบบเครื่องยนต์', 'value' => 480, 'percent' => 39],
+    ['name' => 'โครงรถ & กันสะเทือน', 'value' => 360, 'percent' => 29],
+    ['name' => 'ระบบเบรก', 'value' => 220, 'percent' => 18],
+    ['name' => 'ชุดประกอบอื่น', 'value' => 180, 'percent' => 14],
+];
+
+$weeklyComparison = $weeklyComparison ?? [
+    ['week' => 'สัปดาห์ 39', 'inventory' => 18000, 'orders' => 15600],
+    ['week' => 'สัปดาห์ 40', 'inventory' => 17000, 'orders' => 16000],
+    ['week' => 'สัปดาห์ 41', 'inventory' => 16500, 'orders' => 18200],
+    ['week' => 'สัปดาห์ 42', 'inventory' => 15200, 'orders' => 16800],
+];
+
+$productWeekly = $productWeekly ?? [
+    '24651-KRM-840' => [
+        'label' => 'SPG.SHIFT RETURN',
+        'weeks' => [
+            ['week' => '39', 'inventory' => 18000, 'orders' => 15600],
+            ['week' => '40', 'inventory' => 16800, 'orders' => 14400],
+            ['week' => '41', 'inventory' => 15600, 'orders' => 17600],
+            ['week' => '42', 'inventory' => 14800, 'orders' => 16800],
+        ],
+    ],
+    '53220-GN5-850' => [
+        'label' => 'THREAD COMP STRG TOP',
+        'weeks' => [
+            ['week' => '39', 'inventory' => 16000, 'orders' => 14800],
+            ['week' => '40', 'inventory' => 16800, 'orders' => 15200],
+            ['week' => '41', 'inventory' => 15800, 'orders' => 17000],
+            ['week' => '42', 'inventory' => 15000, 'orders' => 16000],
+        ],
+    ],
+    '90306-K87-A000' => [
+        'label' => 'NUT STRG STEM',
+        'weeks' => [
+            ['week' => '39', 'inventory' => 14000, 'orders' => 15200],
+            ['week' => '40', 'inventory' => 14800, 'orders' => 16800],
+            ['week' => '41', 'inventory' => 15600, 'orders' => 16000],
+            ['week' => '42', 'inventory' => 16400, 'orders' => 15000],
+        ],
+    ],
+    '95015-32001' => [
+        'label' => 'JOINT B BRAKE ARM',
+        'weeks' => [
+            ['week' => '39', 'inventory' => 13200, 'orders' => 14000],
+            ['week' => '40', 'inventory' => 14400, 'orders' => 15600],
+            ['week' => '41', 'inventory' => 15200, 'orders' => 14800],
+            ['week' => '42', 'inventory' => 13800, 'orders' => 16000],
+        ],
+    ],
+    '90501-K26-9500' => [
+        'label' => 'WASHER PLAIN 6 MM',
+        'weeks' => [
+            ['week' => '39', 'inventory' => 15000, 'orders' => 13800],
+            ['week' => '40', 'inventory' => 16000, 'orders' => 15000],
+            ['week' => '41', 'inventory' => 16800, 'orders' => 18000],
+            ['week' => '42', 'inventory' => 15800, 'orders' => 17000],
+        ],
+    ],
+];
+
+$lineStatus = $lineStatus ?? [
+    ['line' => 'สาย A3 · โครงเกียร์', 'detail' => 'OEE 96.1% · 3,720 ชิ้น/กะ', 'status' => 'กำลังผลิต'],
+    ['line' => 'สาย B1 · ปีกนก', 'detail' => 'เพิ่มรอบตรวจ QC +12 นาที/ล็อต', 'status' => 'เฝ้าระวัง'],
+    ['line' => 'สาย C2 · ก้ามเบรก', 'detail' => 'คิวเปลี่ยนแม่พิมพ์ใน 25 นาที', 'status' => 'กำลังผลิต'],
+    ['line' => 'สาย D4 · ระบบพวงมาลัย', 'detail' => 'ซ่อมวาล์วไฮดรอลิก 45 นาที', 'status' => 'หยุดฉุกเฉิน'],
+];
+
+$alerts = $alerts ?? [
+    ['title' => 'เหล็กเกรด 42CrMo4 ส่งล่าช้า', 'meta' => 'ซัพพลายเออร์หลัก · 6 ชม. · กระทบสาย C2', 'type' => 'critical'],
+    ['title' => 'กะกลางคืนต่ำกว่าเป้า 5%', 'meta' => 'เครื่องปรับบ่อย · รอกำหนดกะสำรอง', 'type' => 'warning'],
+    ['title' => 'QC ขอเพิ่มตัวอย่าง X-ray', 'meta' => 'โครงเกียร์ล็อต 2211-07', 'type' => 'info'],
+];
+
+$maintenanceTasks = $maintenanceTasks ?? [
+    ['title' => 'เปลี่ยนซีลไฮดรอลิก · สาย D4', 'meta' => 'เครื่องกด #2 · 10:30 น.', 'time' => 'อีก 45 นาที'],
+    ['title' => 'ปรับเทียบแขนกล · สาย B1', 'meta' => 'หลังจบกะกลางวัน · ทีมวิศวกรรม', 'time' => 'วันนี้ 16:00 น.'],
+    ['title' => 'ตรวจระบบหล่อเย็น · สาย A3', 'meta' => 'แจ้งเตือน IoT · อุณหภูมิสูง', 'time' => 'ภายใน 6 ชม.'],
+];
+
+require_once 'helpers/MenuHelper.php';
+$menuItems = MenuHelper::getAccessibleMenuItems();
+
+
+$maxWeeklyValue = 0;
+foreach ($weeklyComparison as $week) {
+    $maxWeeklyValue = max($maxWeeklyValue, $week['inventory'], $week['orders']);
+}
+$maxWeeklyValue = $maxWeeklyValue ?: 1;
+?>
+<script src="<?= BASE_URL ?>lib/static/js/initTheme.js"></script>
+<div id="app">
+    <?php include 'views/layouts/navbar-mazer.php'; ?>
+    <?php include 'views/layouts/header.php'; ?>
+    <div class="dashboard-container">
+
+        <?php if (!empty($menuItems)): ?>
+            <section class="menu-section">
+                <div class="menu-header">
+                    <h2>เมนูที่สามารถเข้าถึงได้</h2>
+                    <p>เลือกจัดการโมดูลที่คุณมีสิทธิ์เข้าถึงได้อย่างรวดเร็ว</p>
+                </div>
+                <div class="menu-grid">
+                    <?php foreach ($menuItems as $item): ?>
+                        <?php if ($item['type'] === 'link'): ?>
+                            <a class="menu-card" href="<?= htmlspecialchars($item['url']) ?>">
+                                <div class="menu-card-icon">
+                                    <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
+                                </div>
+                                <div class="menu-card-text">
+                                    <h3><?= htmlspecialchars($item['title']) ?></h3>
+                                    <p><?= htmlspecialchars($item['subtitle']) ?></p>
+                                </div>
+                            </a>
+                        <?php elseif ($item['type'] === 'modal'): ?>
+                            <button type="button" class="menu-card menu-card-button" data-bs-toggle="modal" data-bs-target="<?= htmlspecialchars($item['target']) ?>">
+                                <div class="menu-card-icon">
+                                    <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
+                                </div>
+                                <div class="menu-card-text">
+                                    <h3><?= htmlspecialchars($item['title']) ?></h3>
+                                    <p><?= htmlspecialchars($item['subtitle']) ?></p>
+                                </div>
+                            </button>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        <?php endif; ?>
+
+
+
+        <section class="kpi-grid">
+            <?php foreach ($kpiCards as $card): ?>
+                <article class="kpi-card">
+                    <h3><?= htmlspecialchars($card['title']) ?></h3>
+                    <strong><?= htmlspecialchars($card['value']) ?></strong>
+                    <span class="kpi-trend <?= htmlspecialchars($card['trendType']) ?>">
+                        <?= htmlspecialchars($card['trend']) ?>
+                    </span>
+                </article>
+            <?php endforeach; ?>
+        </section>
+
+        <section class="chart-layout">
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <h2>สินค้าคงคลัง vs ออเดอร์</h2>
+                        <span>เปรียบเทียบสี่สัปดาห์ล่าสุด</span>
+                    </div>
+                    <span class="status-chip">อัปเดต 09:45 น.</span>
+                </div>
+                <div class="weekly-compare-card">
+                    <?php foreach ($weeklyComparison as $week): ?>
+                        <?php
+                        $inventoryHeight = max(14, round(($week['inventory'] / $maxWeeklyValue) * 170));
+                        $ordersHeight = max(14, round(($week['orders'] / $maxWeeklyValue) * 170));
+                        ?>
+                        <div class="weekly-column">
+                            <div class="weekly-bars">
+                                <div class="bar inventory" style="height: <?= $inventoryHeight ?>px;">
+                                    <?= round($week['inventory'] / 1000, 1) ?>k
+                                </div>
+                                <div class="bar orders" style="height: <?= $ordersHeight ?>px;">
+                                    <?= round($week['orders'] / 1000, 1) ?>k
+                                </div>
+                            </div>
+                            <span class="weekly-label"><?= htmlspecialchars($week['week']) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <h2>สัดส่วนสินค้าตามหมวด</h2>
+                        <span>รวมทั้งหมด <?= number_format(array_sum(array_column($productBreakdown, 'value'))) ?> รายการ</span>
+                    </div>
+                    <span class="status-chip">อัปเดตล่าสุด</span>
+                </div>
+                <div class="list">
+                    <?php foreach ($productBreakdown as $item): ?>
+                        <div class="list-item">
+                            <h4><?= htmlspecialchars($item['name']) ?></h4>
+                            <span><?= number_format($item['value']) ?> SKU · <?= $item['percent'] ?>%</span>
+                            <div style="height: 6px; border-radius: 999px; background: rgba(37, 99, 235, 0.12); overflow: hidden;">
+                                <div style="width: <?= $item['percent'] ?>%; height: 100%; background: var(--accent);"></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </article>
+        </section>
+
+        <section class="product-weekly-grid">
+            <?php foreach ($productWeekly as $code => $product): ?>
+                <?php
+                $maxProductValue = 0;
+                foreach ($product['weeks'] as $week) {
+                    $maxProductValue = max($maxProductValue, $week['inventory'], $week['orders']);
+                }
+                $maxProductValue = $maxProductValue ?: 1;
+                $inventorySum = array_sum(array_column($product['weeks'], 'inventory'));
+                $ordersSum = array_sum(array_column($product['weeks'], 'orders'));
+                ?>
+                <article class="product-week-card">
+                    <div class="product-header">
+                        <span class="product-code"><?= htmlspecialchars($code) ?></span>
+                        <span class="product-meta"><?= htmlspecialchars($product['label']) ?></span>
+                    </div>
+                    <div class="product-week-chart">
+                        <?php foreach ($product['weeks'] as $week): ?>
+                            <?php
+                            $inventoryHeight = max(12, round(($week['inventory'] / $maxProductValue) * 120));
+                            $ordersHeight = max(12, round(($week['orders'] / $maxProductValue) * 120));
+                            ?>
+                            <div class="product-week-column">
+                                <div class="product-week-bars">
+                                    <div class="bar inventory" style="height: <?= $inventoryHeight ?>px;"></div>
+                                    <div class="bar orders" style="height: <?= $ordersHeight ?>px;"></div>
+                                </div>
+                                <span class="weekly-label">wk <?= htmlspecialchars($week['week']) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="product-week-summary">
+                        <span>คงคลังเฉลี่ย <?= number_format($inventorySum / count($product['weeks'])) ?> ชิ้น</span>
+                        <span>ออเดอร์เฉลี่ย <?= number_format($ordersSum / count($product['weeks'])) ?> ชิ้น</span>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </section>
+
+        <section class="dual-column">
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <h2>สถานะสายการผลิต</h2>
+                        <span>ภาพรวมโรงงาน</span>
+                    </div>
+                </div>
+                <div class="list">
+                    <?php foreach ($lineStatus as $line): ?>
+                        <div class="list-item">
+                            <h4><?= htmlspecialchars($line['line']) ?></h4>
+                            <span><?= htmlspecialchars($line['detail']) ?></span>
+                            <span class="badge <?= $line['status'] === 'หยุดฉุกเฉิน' ? 'critical' : ($line['status'] === 'เฝ้าระวัง' ? 'warning' : 'info') ?>">
+                                <?= htmlspecialchars($line['status']) ?>
+                            </span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <h2>แจ้งเตือนล่าสุด</h2>
+                        <span>อัปเดตแบบเรียลไทม์</span>
+                    </div>
+                </div>
+                <div class="list">
+                    <?php foreach ($alerts as $alert): ?>
+                        <div class="list-item">
+                            <h4><?= htmlspecialchars($alert['title']) ?></h4>
+                            <span><?= htmlspecialchars($alert['meta']) ?></span>
+                            <span class="badge <?= htmlspecialchars($alert['type']) ?>">
+                                <?= strtoupper($alert['type']) ?>
+                            </span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-header">
+                    <div>
+                        <h2>งานบำรุงรักษา</h2>
+                        <span>ภายใน 24 ชั่วโมง</span>
+                    </div>
+                </div>
+                <div class="list">
+                    <?php foreach ($maintenanceTasks as $task): ?>
+                        <div class="list-item">
+                            <h4><?= htmlspecialchars($task['title']) ?></h4>
+                            <span><?= htmlspecialchars($task['meta']) ?></span>
+                            <span class="badge info"><?= htmlspecialchars($task['time']) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </article>
+        </section>
+    </div>
+</div>
+
+<script src="<?= BASE_URL ?>lib/compiled/js/app.js"></script>
+</body>
+
+</html>

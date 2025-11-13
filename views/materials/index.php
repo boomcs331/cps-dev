@@ -148,14 +148,16 @@ $materials = $materials ?? [];
                                                 </span>
                                             </td>
                                             <td>
-                                                <div class="action-buttons">
-                                                    <button class="btn btn-warning" onclick="editMaterial(<?= $material['id'] ?>)" title="แก้ไข">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn btn-danger" onclick="deleteMaterial(<?= $material['id'] ?>)" title="ลบ">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
+                                                <?php
+                                                require_once 'helpers/ActionHelper.php';
+                                                $actions = [
+                                                    ['type' => 'link', 'label' => 'ดูรายละเอียด', 'url' => '/materials/view/{id}', 'icon' => 'fas fa-eye'],
+                                                    ['type' => 'link', 'label' => 'แก้ไข', 'url' => '/materials/edit/{id}', 'icon' => 'fas fa-edit', 'class' => 'text-warning'],
+                                                    ['type' => 'divider'],
+                                                    ['type' => 'link', 'label' => 'ลบ', 'url' => 'javascript:deleteMaterial({id})', 'icon' => 'fas fa-trash', 'class' => 'text-danger'],
+                                                ];
+                                                echo ActionHelper::renderDropdown($actions, $material['id']);
+                                                ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -236,12 +238,14 @@ $materials = $materials ?? [];
                                                 <td><?= htmlspecialchars($receipt['supplier_name']) ?></td>
                                                 <td><code><?= htmlspecialchars($receipt['receipt_no']) ?></code></td>
                                                 <td>
-                                                    <button class="btn btn-sm btn-info" onclick="viewReceipt(<?= $receipt['id'] ?>)" title="ดูรายละเอียด">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger" onclick="deleteReceipt(<?= $receipt['id'] ?>)" title="ลบ">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
+                                                    <div class="btn-group">
+                                                        <a href="<?= BASE_URL ?>?url=materials/receiptDetail/<?= $receipt['id'] ?>" class="btn btn-sm btn-outline-primary" title="ดูรายละเอียดและ QR Code">
+                                                            <i class="fas fa-qrcode me-1"></i>QR Code
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteReceipt(<?= $receipt['id'] ?>)" title="ลบรายการ">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>

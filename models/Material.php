@@ -557,4 +557,47 @@ class Material extends Model
         $stmt = $this->db->prepare("DELETE FROM material_receipts WHERE id = ?");
         return $stmt->execute([$receiptId]);
     }
+
+    public function getReceiptDetail(int $receiptId): ?array
+    {
+        $sql = "
+            SELECT mr.id, mr.receipt_no, mr.receipt_date, mr.supplier_name, mr.created_at,
+                   mri.id as item_id, mri.received_qty, mri.packing_qty, mri.full_box_count, 
+                   mri.partial_box_qty, mri.total_box_count, mri.lot_no,
+                   m.material_code, COALESCE(mn.name, 'N/A') as material_name,
+                   u.unit_name, l.location_name
+            FROM material_receipts mr
+            LEFT JOIN material_receipt_items mri ON mr.id = mri.receipt_id
+            LEFT JOIN materials m ON mri.material_id = m.material_id
+            LEFT JOIN material_names mn ON m.material_id = mn.material_id 
+                AND mn.language_code = 'th' AND mn.is_primary = 1
+            LEFT JOIN units u ON m.default_unit = u.unit_id
+            LEFT JOIN locations l ON mr.location_id = l.location_id
+            WHERE mr.id = ?
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$receiptId]);
+        $receiptData = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$receiptData) {
+            return null;
+        }
+        
+        // Get QR codes for this receipt
+        $qrSql = "
+            SELECT msl.qr_code, msl.pack_no, msl.pack_size, msl.status
+            FROM material_stock_lots msl
+            WHERE msl.receipt_item_id = ?
+            ORDER BY msl.pack_no
+        ";
+        
+        $qrStmt = $this->db->prepare($qrSql);
+        $qrStmt->execute([$receiptData['item_id']]);
+        $qrCodes = $qrStmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $receiptData['qr_codes'] = $qrCodes;
+        
+        return $receiptData;
+    }
 }

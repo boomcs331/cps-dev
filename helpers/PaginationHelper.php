@@ -13,62 +13,72 @@ class PaginationHelper
         $start = (($currentPage - 1) * $perPage) + 1;
         $end = min($currentPage * $perPage, $totalRecords);
         
-        $html = '<div class="d-flex justify-content-between align-items-center py-3 px-3" style="background: #f8f9fa; border-radius: 8px; margin-top: 20px; border: 1px solid #e9ecef;">';
+        $html = '<div class="d-flex justify-content-between align-items-center py-3 px-3 border-top bg-white">';
         
         // Left: Records info
-        $html .= '<div class="d-flex align-items-center gap-3">';
-        $html .= '<small class="text-muted fw-medium">' . number_format($start) . '-' . number_format($end) . ' จาก ' . number_format($totalRecords) . '</small>';
+        $html .= '<div class="text-muted small">แสดง ' . $start . ' ถึง ' . $end . ' จาก ' . number_format($totalRecords) . '</div>';
         
-        // Per page selector
-        if ($totalRecords > 10) {
-            $html .= '<select class="form-select form-select-sm" style="width: 70px; font-size: 12px;" onchange="changePerPage(this.value)">';
-            foreach ([10, 25, 50, 100] as $option) {
-                $selected = $perPage == $option ? 'selected' : '';
-                $html .= "<option value=\"$option\" $selected>$option</option>";
-            }
-            $html .= '</select>';
+        // Right: Pagination controls
+        $html .= '<div class="d-flex align-items-center gap-3">';
+        
+        // Rows per page
+        $html .= '<div class="d-flex align-items-center gap-2">';
+        $html .= '<span class="text-muted small">Rows per page</span>';
+        $html .= '<select class="form-select form-select-sm" style="width: 70px;" onchange="changePerPage(this.value)">';
+        foreach ([10, 25, 50, 100] as $option) {
+            $selected = $perPage == $option ? 'selected' : '';
+            $html .= "<option value=\"$option\" $selected>$option</option>";
         }
+        $html .= '</select>';
         $html .= '</div>';
         
-        // Right: Pagination
+        // Pagination
         if ($totalPages > 1) {
-            $html .= '<div class="btn-group btn-group-sm" role="group">';
+            $html .= '<nav>';
+            $html .= '<ul class="pagination pagination-sm mb-0">';
             
             // Previous
+            $html .= '<li class="page-item' . ($currentPage <= 1 ? ' disabled' : '') . '">';
             if ($currentPage > 1) {
-                $html .= '<a href="' . self::buildUrl($baseUrl, $currentPage - 1, $perPage) . '" class="btn btn-outline-secondary" title="ก่อนหน้า">';
-                $html .= '<i class="fas fa-chevron-left"></i>';
-                $html .= '</a>';
+                $html .= '<a class="page-link" href="' . self::buildUrl($baseUrl, $currentPage - 1, $perPage) . '">Previous</a>';
+            } else {
+                $html .= '<span class="page-link text-muted">Previous</span>';
+            }
+            $html .= '</li>';
+            
+            // Current page info
+            $html .= '<li class="page-item active">';
+            $html .= '<span class="page-link">' . $currentPage . '</span>';
+            $html .= '</li>';
+            
+            // Dots if needed
+            if ($currentPage < $totalPages - 1) {
+                $html .= '<li class="page-item disabled">';
+                $html .= '<span class="page-link">...</span>';
+                $html .= '</li>';
             }
             
-            // Page numbers (show max 5)
-            $pageStart = max(1, $currentPage - 2);
-            $pageEnd = min($totalPages, $currentPage + 2);
-            
-            // Adjust if at beginning or end
-            if ($pageEnd - $pageStart < 4) {
-                if ($pageStart == 1) {
-                    $pageEnd = min($totalPages, $pageStart + 4);
-                } else {
-                    $pageStart = max(1, $pageEnd - 4);
-                }
-            }
-            
-            for ($i = $pageStart; $i <= $pageEnd; $i++) {
-                $class = $i == $currentPage ? 'btn-primary' : 'btn-outline-secondary';
-                $html .= '<a href="' . self::buildUrl($baseUrl, $i, $perPage) . '" class="btn ' . $class . '" style="min-width: 35px;">' . $i . '</a>';
+            // Last page
+            if ($currentPage < $totalPages) {
+                $html .= '<li class="page-item">';
+                $html .= '<a class="page-link" href="' . self::buildUrl($baseUrl, $totalPages, $perPage) . '">' . $totalPages . '</a>';
+                $html .= '</li>';
             }
             
             // Next
+            $html .= '<li class="page-item' . ($currentPage >= $totalPages ? ' disabled' : '') . '">';
             if ($currentPage < $totalPages) {
-                $html .= '<a href="' . self::buildUrl($baseUrl, $currentPage + 1, $perPage) . '" class="btn btn-outline-secondary" title="ถัดไป">';
-                $html .= '<i class="fas fa-chevron-right"></i>';
-                $html .= '</a>';
+                $html .= '<a class="page-link" href="' . self::buildUrl($baseUrl, $currentPage + 1, $perPage) . '">Next</a>';
+            } else {
+                $html .= '<span class="page-link text-muted">Next</span>';
             }
+            $html .= '</li>';
             
-            $html .= '</div>';
+            $html .= '</ul>';
+            $html .= '</nav>';
         }
         
+        $html .= '</div>';
         $html .= '</div>';
         
         return $html;
@@ -85,62 +95,72 @@ class PaginationHelper
         $start = (($currentPage - 1) * $perPage) + 1;
         $end = min($currentPage * $perPage, $totalRecords);
         
-        $html = '<div class="d-flex justify-content-between align-items-center py-3 px-3" style="background: #f8f9fa; border-radius: 8px; margin-top: 20px; border: 1px solid #e9ecef;">';
+        $html = '<div class="d-flex justify-content-between align-items-center py-3 px-3 border-top bg-white">';
         
         // Left: Records info
-        $html .= '<div class="d-flex align-items-center gap-3">';
-        $html .= '<small class="text-muted fw-medium">' . number_format($start) . '-' . number_format($end) . ' จาก ' . number_format($totalRecords) . '</small>';
+        $html .= '<div class="text-muted small">แสดง ' . $start . ' ถึง ' . $end . ' จาก ' . number_format($totalRecords) . '</div>';
         
-        // Per page selector
-        if ($totalRecords > 10) {
-            $html .= '<select class="form-select form-select-sm" style="width: 70px; font-size: 12px;" onchange="changePerPageWithPrefix(this.value, \'' . $prefix . '\')">'; 
-            foreach ([10, 25, 50, 100] as $option) {
-                $selected = $perPage == $option ? 'selected' : '';
-                $html .= "<option value=\"$option\" $selected>$option</option>";
-            }
-            $html .= '</select>';
+        // Right: Pagination controls
+        $html .= '<div class="d-flex align-items-center gap-3">';
+        
+        // Rows per page
+        $html .= '<div class="d-flex align-items-center gap-2">';
+        $html .= '<span class="text-muted small">Rows per page</span>';
+        $html .= '<select class="form-select form-select-sm" style="width: 70px;" onchange="changePerPageWithPrefix(this.value, \'' . $prefix . '\')">';
+        foreach ([10, 25, 50, 100] as $option) {
+            $selected = $perPage == $option ? 'selected' : '';
+            $html .= "<option value=\"$option\" $selected>$option</option>";
         }
+        $html .= '</select>';
         $html .= '</div>';
         
-        // Right: Pagination
+        // Pagination
         if ($totalPages > 1) {
-            $html .= '<div class="btn-group btn-group-sm" role="group">';
+            $html .= '<nav>';
+            $html .= '<ul class="pagination pagination-sm mb-0">';
             
             // Previous
+            $html .= '<li class="page-item' . ($currentPage <= 1 ? ' disabled' : '') . '">';
             if ($currentPage > 1) {
-                $html .= '<a href="' . self::buildUrlWithPrefix('', $currentPage - 1, $perPage, $prefix) . '" class="btn btn-outline-secondary" title="ก่อนหน้า">';
-                $html .= '<i class="fas fa-chevron-left"></i>';
-                $html .= '</a>';
+                $html .= '<a class="page-link" href="' . self::buildUrlWithPrefix('', $currentPage - 1, $perPage, $prefix) . '">Previous</a>';
+            } else {
+                $html .= '<span class="page-link text-muted">Previous</span>';
+            }
+            $html .= '</li>';
+            
+            // Current page info
+            $html .= '<li class="page-item active">';
+            $html .= '<span class="page-link">' . $currentPage . '</span>';
+            $html .= '</li>';
+            
+            // Dots if needed
+            if ($currentPage < $totalPages - 1) {
+                $html .= '<li class="page-item disabled">';
+                $html .= '<span class="page-link">...</span>';
+                $html .= '</li>';
             }
             
-            // Page numbers (show max 5)
-            $pageStart = max(1, $currentPage - 2);
-            $pageEnd = min($totalPages, $currentPage + 2);
-            
-            // Adjust if at beginning or end
-            if ($pageEnd - $pageStart < 4) {
-                if ($pageStart == 1) {
-                    $pageEnd = min($totalPages, $pageStart + 4);
-                } else {
-                    $pageStart = max(1, $pageEnd - 4);
-                }
-            }
-            
-            for ($i = $pageStart; $i <= $pageEnd; $i++) {
-                $class = $i == $currentPage ? 'btn-primary' : 'btn-outline-secondary';
-                $html .= '<a href="' . self::buildUrlWithPrefix('', $i, $perPage, $prefix) . '" class="btn ' . $class . '" style="min-width: 35px;">' . $i . '</a>';
+            // Last page
+            if ($currentPage < $totalPages) {
+                $html .= '<li class="page-item">';
+                $html .= '<a class="page-link" href="' . self::buildUrlWithPrefix('', $totalPages, $perPage, $prefix) . '">' . $totalPages . '</a>';
+                $html .= '</li>';
             }
             
             // Next
+            $html .= '<li class="page-item' . ($currentPage >= $totalPages ? ' disabled' : '') . '">';
             if ($currentPage < $totalPages) {
-                $html .= '<a href="' . self::buildUrlWithPrefix('', $currentPage + 1, $perPage, $prefix) . '" class="btn btn-outline-secondary" title="ถัดไป">';
-                $html .= '<i class="fas fa-chevron-right"></i>';
-                $html .= '</a>';
+                $html .= '<a class="page-link" href="' . self::buildUrlWithPrefix('', $currentPage + 1, $perPage, $prefix) . '">Next</a>';
+            } else {
+                $html .= '<span class="page-link text-muted">Next</span>';
             }
+            $html .= '</li>';
             
-            $html .= '</div>';
+            $html .= '</ul>';
+            $html .= '</nav>';
         }
         
+        $html .= '</div>';
         $html .= '</div>';
         
         return $html;

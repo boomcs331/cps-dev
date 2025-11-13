@@ -1,8 +1,4 @@
 <?php
-/**
- * ข้อมูลที่หน้าแดชบอร์ดใช้แสดงผลสามารถส่งมาจาก Controller ได้
- * หากไม่มีการส่งเข้ามา จะใช้ค่าตัวอย่างด้านล่างเพื่อให้หน้าเพจยังสวยงาม
- */
 
 $permissions = $permissions ?? ($_SESSION['permissions'] ?? []);
 if (!is_array($permissions)) {
@@ -129,302 +125,53 @@ foreach ($weeklyComparison as $week) {
 }
 $maxWeeklyValue = $maxWeeklyValue ?: 1;
 ?>
-<!DOCTYPE html>
-<html lang="th">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - CPS</title>
-    <link rel="shortcut icon" href="<?= BASE_URL ?>lib/compiled/svg/favicon.svg" type="image/x-icon">
-    <link rel="stylesheet" href="<?= BASE_URL ?>lib/compiled/css/app.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>lib/compiled/css/app-dark.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>lib/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>lib/css/dashboard-shared.css">
-</head>
 
-<body>
-    <script src="<?= BASE_URL ?>lib/static/js/initTheme.js"></script>
-    <div id="app">
-        <?php include 'views/layouts/navbar-mazer.php'; ?>
-
-        <div class="dashboard-container">
-
-            <?php if (!empty($menuItems)): ?>
-                <section class="menu-section">
-                    <div class="menu-header">
-                        <h2>เมนูที่สามารถเข้าถึงได้</h2>
-                        <p>เลือกจัดการโมดูลที่คุณมีสิทธิ์เข้าถึงได้อย่างรวดเร็ว</p>
-                    </div>
-                    <div class="menu-grid">
-                        <?php foreach ($menuItems as $item): ?>
-                            <?php if ($item['type'] === 'link'): ?>
-                                <a class="menu-card" href="<?= htmlspecialchars($item['url']) ?>">
-                                    <div class="menu-card-icon">
-                                        <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
-                                    </div>
-                                    <div class="menu-card-text">
-                                        <h3><?= htmlspecialchars($item['title']) ?></h3>
-                                        <p><?= htmlspecialchars($item['subtitle']) ?></p>
-                                    </div>
-                                </a>
-                            <?php elseif ($item['type'] === 'modal'): ?>
-                                <button type="button" class="menu-card menu-card-button" data-bs-toggle="modal" data-bs-target="<?= htmlspecialchars($item['target']) ?>">
-                                    <div class="menu-card-icon">
-                                        <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
-                                    </div>
-                                    <div class="menu-card-text">
-                                        <h3><?= htmlspecialchars($item['title']) ?></h3>
-                                        <p><?= htmlspecialchars($item['subtitle']) ?></p>
-                                    </div>
-                                </button>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </div>
-                </section>
-            <?php endif; ?>
-
-            <section class="kpi-grid">
-                <?php foreach ($kpiCards as $card): ?>
-                    <article class="kpi-card">
-                        <h3><?= htmlspecialchars($card['title']) ?></h3>
-                        <strong><?= htmlspecialchars($card['value']) ?></strong>
-                        <span class="kpi-trend <?= htmlspecialchars($card['trendType']) ?>">
-                            <?= htmlspecialchars($card['trend']) ?>
-                        </span>
-                    </article>
-                <?php endforeach; ?>
-            </section>
-
-            <section class="chart-layout">
-                <article class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2>สินค้าคงคลัง vs ออเดอร์</h2>
-                            <span>เปรียบเทียบสี่สัปดาห์ล่าสุด</span>
-                        </div>
-                        <span class="status-chip">อัปเดต 09:45 น.</span>
-                    </div>
-                    <div class="weekly-compare-card">
-                        <?php foreach ($weeklyComparison as $week): ?>
-                            <?php
-                            $inventoryHeight = max(14, round(($week['inventory'] / $maxWeeklyValue) * 170));
-                            $ordersHeight = max(14, round(($week['orders'] / $maxWeeklyValue) * 170));
-                            ?>
-                            <div class="weekly-column">
-                                <div class="weekly-bars">
-                                    <div class="bar inventory" style="height: <?= $inventoryHeight ?>px;">
-                                        <?= round($week['inventory'] / 1000, 1) ?>k
-                                    </div>
-                                    <div class="bar orders" style="height: <?= $ordersHeight ?>px;">
-                                        <?= round($week['orders'] / 1000, 1) ?>k
-                                    </div>
-                                </div>
-                                <span class="weekly-label"><?= htmlspecialchars($week['week']) ?></span>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </article>
-
-                <article class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2>สัดส่วนสินค้าตามหมวด</h2>
-                            <span>รวมทั้งหมด <?= number_format(array_sum(array_column($productBreakdown, 'value'))) ?> รายการ</span>
-                        </div>
-                        <span class="status-chip">อัปเดตล่าสุด</span>
-                    </div>
-                    <div class="list">
-                        <?php foreach ($productBreakdown as $item): ?>
-                            <div class="list-item">
-                                <h4><?= htmlspecialchars($item['name']) ?></h4>
-                                <span><?= number_format($item['value']) ?> SKU · <?= $item['percent'] ?>%</span>
-                                <div style="height: 6px; border-radius: 999px; background: rgba(37, 99, 235, 0.12); overflow: hidden;">
-                                    <div style="width: <?= $item['percent'] ?>%; height: 100%; background: var(--accent);"></div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </article>
-            </section>
-
-            <section class="product-weekly-grid">
-                <?php foreach ($productWeekly as $code => $product): ?>
-                    <?php
-                    $maxProductValue = 0;
-                    foreach ($product['weeks'] as $week) {
-                        $maxProductValue = max($maxProductValue, $week['inventory'], $week['orders']);
-                    }
-                    $maxProductValue = $maxProductValue ?: 1;
-                    $inventorySum = array_sum(array_column($product['weeks'], 'inventory'));
-                    $ordersSum = array_sum(array_column($product['weeks'], 'orders'));
-                    ?>
-                    <article class="product-week-card">
-                        <div class="product-header">
-                            <span class="product-code"><?= htmlspecialchars($code) ?></span>
-                            <span class="product-meta"><?= htmlspecialchars($product['label']) ?></span>
-                        </div>
-                        <div class="product-week-chart">
-                            <?php foreach ($product['weeks'] as $week): ?>
-                                <?php
-                                $inventoryHeight = max(12, round(($week['inventory'] / $maxProductValue) * 120));
-                                $ordersHeight = max(12, round(($week['orders'] / $maxProductValue) * 120));
-                                ?>
-                                <div class="product-week-column">
-                                    <div class="product-week-bars">
-                                        <div class="bar inventory" style="height: <?= $inventoryHeight ?>px;"></div>
-                                        <div class="bar orders" style="height: <?= $ordersHeight ?>px;"></div>
-                                    </div>
-                                    <span class="weekly-label">wk <?= htmlspecialchars($week['week']) ?></span>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                        <div class="product-week-summary">
-                            <span>คงคลังเฉลี่ย <?= number_format($inventorySum / count($product['weeks'])) ?> ชิ้น</span>
-                            <span>ออเดอร์เฉลี่ย <?= number_format($ordersSum / count($product['weeks'])) ?> ชิ้น</span>
-                        </div>
-                    </article>
-                <?php endforeach; ?>
-            </section>
-
-            <section class="dual-column">
-                <article class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2>สถานะสายการผลิต</h2>
-                            <span>ภาพรวมโรงงาน</span>
-                        </div>
-                    </div>
-                    <div class="list">
-                        <?php foreach ($lineStatus as $line): ?>
-                            <div class="list-item">
-                                <h4><?= htmlspecialchars($line['line']) ?></h4>
-                                <span><?= htmlspecialchars($line['detail']) ?></span>
-                                <span class="badge <?= $line['status'] === 'หยุดฉุกเฉิน' ? 'critical' : ($line['status'] === 'เฝ้าระวัง' ? 'warning' : 'info') ?>">
-                                    <?= htmlspecialchars($line['status']) ?>
-                                </span>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </article>
-
-                <article class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2>แจ้งเตือนล่าสุด</h2>
-                            <span>อัปเดตแบบเรียลไทม์</span>
-                        </div>
-                    </div>
-                    <div class="list">
-                        <?php foreach ($alerts as $alert): ?>
-                            <div class="list-item">
-                                <h4><?= htmlspecialchars($alert['title']) ?></h4>
-                                <span><?= htmlspecialchars($alert['meta']) ?></span>
-                                <span class="badge <?= htmlspecialchars($alert['type']) ?>">
-                                    <?= strtoupper($alert['type']) ?>
-                                </span>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </article>
-
-                <article class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2>งานบำรุงรักษา</h2>
-                            <span>ภายใน 24 ชั่วโมง</span>
-                        </div>
-                    </div>
-                    <div class="list">
-                        <?php foreach ($maintenanceTasks as $task): ?>
-                            <div class="list-item">
-                                <h4><?= htmlspecialchars($task['title']) ?></h4>
-                                <span><?= htmlspecialchars($task['meta']) ?></span>
-                                <span class="badge info"><?= htmlspecialchars($task['time']) ?></span>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </article>
-            </section>
-        </div>
-    </div>
-
-    <!-- Add User Modal -->
-    <div class="modal fade" id="addUserModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">เพิ่มผู้ใช้งาน</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="addUserForm">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">ชื่อผู้ใช้ <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">อีเมล <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" name="email" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">รหัสผ่าน <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" name="password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">ชื่อ-นามสกุล</label>
-                            <input type="text" class="form-control" name="full_name">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">บทบาท</label>
-                            <?php
-                            $userModel = new User();
-                            $roles = $userModel->getAllRoles();
-                            foreach ($roles as $role):
-                                ?>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="roles[]" value="<?= $role['id'] ?>" id="role_<?= $role['id'] ?>">
-                                    <label class="form-check-label" for="role_<?= $role['id'] ?>">
-                                        <?= htmlspecialchars($role['display_name']) ?>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                        <button type="submit" class="btn btn-primary">บันทึกผู้ใช้</button>
-                    </div>
-                </form>
+<?php include 'views/layouts/navbar-mazer.php'; ?>
+<?php include 'views/layouts/header.php'; ?>
+<div class="dashboard-container">
+    <?php if (!empty($menuItems)): ?>
+        <section class="menu-section">
+             <article class="kpi-card">
+            <div class="menu-header">
+                <h2>เมนูที่สามารถเข้าถึงได้</h2>
+                <p>เลือกจัดการโมดูลที่คุณมีสิทธิ์เข้าถึงได้อย่างรวดเร็ว</p>
             </div>
-        </div>
-    </div>
-
-    <script src="<?= BASE_URL ?>lib/compiled/js/app.js"></script>
-    <script>
-        document.getElementById('addUserForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const formData = new FormData(this);
-
-            fetch('<?= BASE_URL ?>?url=users/create', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('เพิ่มผู้ใช้งานเรียบร้อยแล้ว');
-                        location.reload();
-                    } else {
-                        alert('ไม่สามารถเพิ่มผู้ใช้ได้: ' + (data.message || 'กรุณาลองใหม่'));
-                    }
-                })
-                .catch(() => {
-                    alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
-                });
-        });
-    </script>
-</body>
-
-</html>
+            <div class="menu-grid">
+                <?php foreach ($menuItems as $item): ?>
+                    <?php if ($item['type'] === 'link'): ?>
+                        <a class="menu-card" href="<?= htmlspecialchars($item['url']) ?>">
+                            <div class="menu-card-icon">
+                                <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
+                            </div>
+                            <div class="menu-card-text">
+                                <h3><?= htmlspecialchars($item['title']) ?></h3>
+                                <p><?= htmlspecialchars($item['subtitle']) ?></p>
+                            </div>
+                        </a>
+                    <?php elseif ($item['type'] === 'modal'): ?>
+                        <button type="button" class="menu-card menu-card-button" data-bs-toggle="modal" data-bs-target="<?= htmlspecialchars($item['target']) ?>">
+                            <div class="menu-card-icon">
+                                <i class="<?= htmlspecialchars($item['icon']) ?>"></i>
+                            </div>
+                            <div class="menu-card-text">
+                                <h3><?= htmlspecialchars($item['title']) ?></h3>
+                                <p><?= htmlspecialchars($item['subtitle']) ?></p>
+                            </div>
+                        </button>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+            </article>
+        </section>
+        <section class="kpi-grid">
+            <article class="kpi-card">
+                <div class="menu-header">
+                    <h2>เมนูที่สามารถเข้าถึงได้</h2>
+                    <p>เลือกจัดการโมดูลที่คุณมีสิทธิ์เข้าถึงได้อย่างรวดเร็ว</p>
+                </div>
+            </article>
+        </section>
+    <?php endif; ?>
+</div>
+<?php include 'views/layouts/footer.php'; ?>

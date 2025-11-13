@@ -63,20 +63,20 @@ class MenuHelper
         
         $allMenus = [
             [
+                'title' => 'Users Management',
+                'subtitle' => 'บริหารจัดการผู้ใช้งาน',
+                'icon' => 'fas fa-user-tag',
+                'type' => 'link',
+                'url' => BASE_URL . 'users',
+                'required_roles' => ['admin']
+            ],
+            [
                 'title' => 'Part Control',
                 'subtitle' => 'ติดตามสถานะ Part Control',
                 'icon' => 'fas fa-industry',
                 'type' => 'link',
                 'url' => BASE_URL . 'pc',
                 'required_roles' => ['pc', 'admin']
-            ],
-            [
-                'title' => 'จัดการผู้ใช้',
-                'subtitle' => 'สร้างและอัปเดตบัญชีผู้ใช้งาน',
-                'icon' => 'fas fa-users',
-                'type' => 'link',
-                'url' => BASE_URL . 'users',
-                'required_roles' => ['admin']
             ],
             [
                 'title' => 'จัดการบทบาท',
