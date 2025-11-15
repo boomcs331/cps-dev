@@ -123,6 +123,33 @@ class MaterialController extends Controller
         }
     }
 
+    public function detail($id = null)
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        $materialId = (int)($id ?? 0);
+        if ($materialId <= 0) {
+            header('Location: ' . BASE_URL . '?url=materials');
+            exit;
+        }
+
+        $material = $this->materialModel->findMaterialWithName($materialId);
+        if (!$material) {
+            header('Location: ' . BASE_URL . '?url=materials');
+            exit;
+        }
+
+        $data = [
+            'material' => $material,
+            'stockInfo' => ['total_stock' => 0, 'available_stock' => 0, 'reserved_stock' => 0, 'total_lots' => 0],
+            'recentTransactions' => [],
+            'username' => $_SESSION['full_name'] ?? 'ผู้ใช้งาน',
+        ];
+
+        $this->view('materials/view', $data);
+    }
+
     public function edit($id = null)
     {
         SessionManager::checkSession();
@@ -267,6 +294,62 @@ class MaterialController extends Controller
         $this->view('materials/issue/index', $data);
     }
 
+    public function stock()
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        // Check if it's an AJAX request
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            $page = (int)($_GET['page'] ?? 1);
+            $perPage = (int)($_GET['per_page'] ?? 20);
+            
+            $stockLots = $this->materialModel->getStockLots($page, $perPage);
+            $stats = $this->materialModel->getStockStats();
+            
+            $this->json([
+                'success' => true,
+                'stockLots' => $stockLots,
+                'stats' => $stats
+            ]);
+        } else {
+            try {
+                $page = (int)($_GET['page'] ?? 1);
+                $perPage = (int)($_GET['per_page'] ?? 20);
+                
+                $stockLots = $this->materialModel->getStockLots($page, $perPage) ?? [];
+                $totalRecords = $this->materialModel->getTotalStockLots();
+                $materials = $this->materialModel->getMaterialsWithRelations() ?? [];
+                $locations = $this->materialModel->getLocations() ?? [];
+                
+                $data = [
+                    'stockLots' => $stockLots,
+                    'materials' => $materials,
+                    'locations' => $locations,
+                    'currentPage' => $page,
+                    'perPage' => $perPage,
+                    'totalRecords' => $totalRecords,
+                    'username' => $_SESSION['full_name'] ?? 'ผู้ใช้งาน',
+                ];
+
+                $this->view('materials/stock', $data);
+            } catch (Exception $e) {
+                error_log('Stock page error: ' . $e->getMessage());
+                $data = [
+                    'stockLots' => [],
+                    'materials' => [],
+                    'locations' => [],
+                    'currentPage' => 1,
+                    'perPage' => 20,
+                    'totalRecords' => 0,
+                    'username' => $_SESSION['full_name'] ?? 'ผู้ใช้งาน',
+                    'error' => 'เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง'
+                ];
+                $this->view('materials/stock', $data);
+            }
+        }
+    }
+
     public function receiptDetail($id = null)
     {
         SessionManager::checkSession();
@@ -290,5 +373,70 @@ class MaterialController extends Controller
         ];
 
         $this->view('materials/receipt/detail', $data);
+    }
+
+    public function stockDetail()
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest') {
+            http_response_code(400);
+            $this->json(['success' => false, 'message' => 'Invalid request']);
+        }
+
+        $qrCode = $this->getGet('qr_code');
+        if (empty($qrCode)) {
+            $this->json(['success' => false, 'message' => 'QR Code is required']);
+        }
+
+        $stockDetail = $this->materialModel->getStockDetailByQR($qrCode);
+        if (!$stockDetail) {
+            $this->json(['success' => false, 'message' => 'Stock not found']);
+        }
+
+        $this->json(['success' => true, 'stockDetail' => $stockDetail]);
+    }
+
+    public function stockSummary()
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest') {
+            http_response_code(400);
+            $this->json(['success' => false, 'message' => 'Invalid request']);
+            return;
+        }
+
+        try {
+            $materialStockSummary = $this->materialModel->getMaterialStockSummary();
+            $this->json(['success' => true, 'materialStockSummary' => $materialStockSummary]);
+        } catch (Exception $e) {
+            $this->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function stockByMaterial()
+    {
+        SessionManager::checkSession();
+        SessionManager::extendSession();
+
+        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest') {
+            http_response_code(400);
+            $this->json(['success' => false, 'message' => 'Invalid request']);
+        }
+
+        $materialCode = $this->getGet('material_code');
+        if (empty($materialCode)) {
+            $this->json(['success' => false, 'message' => 'Material code is required']);
+        }
+
+        try {
+            $stockLots = $this->materialModel->getStockLotsByMaterial($materialCode);
+            $this->json(['success' => true, 'stockLots' => $stockLots]);
+        } catch (Exception $e) {
+            $this->json(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 }

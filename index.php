@@ -58,6 +58,10 @@ $router->addRoute('/materials/storeReceipt', 'MaterialController', 'storeReceipt
 $router->addRoute('/materials/deleteReceipt', 'MaterialController', 'deleteReceipt');
 $router->addRoute('/materials/receiptDetail/{id}', 'MaterialController', 'receiptDetail');
 $router->addRoute('/materials/issue', 'MaterialController', 'issue');
+$router->addRoute('/materials/stock', 'MaterialController', 'stock');
+$router->addRoute('/materials/stockDetail', 'MaterialController', 'stockDetail');
+$router->addRoute('/materials/stockSummary', 'MaterialController', 'stockSummary');
+$router->addRoute('/materials/stockByMaterial', 'MaterialController', 'stockByMaterial');
 
 
 

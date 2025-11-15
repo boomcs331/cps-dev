@@ -1,0 +1,50 @@
+.code-badge.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.code-badge.clickable:hover {
+    background-color: #007bff !important;
+    color: white !important;
+    transform: scale(1.05);
+}
+
+.timeline {
+    position: relative;
+    padding-left: 20px;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    width: 2px;
+    height: 100%;
+    background-color: #dee2e6;
+    transform: translateY(-50%);
+}
+
+.timeline-item:last-child::before {
+    display: none;
+}
+
+.timeline-item i {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: white;
+    border: 2px solid currentColor;
+    margin-left: -20px;
+    z-index: 1;
+}

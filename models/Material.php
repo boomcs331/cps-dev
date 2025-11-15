@@ -300,12 +300,22 @@ class Material extends Model
             SELECT m.material_id as id, m.material_code, m.description, m.is_active,
                    u.unit_code, u.unit_name,
                    l.location_code, l.location_name,
-                   COALESCE(mn.name, 'N/A') as material_name
+                   COALESCE(mn.name, 'N/A') as material_name,
+                   COALESCE(stock.total_stock, 0) as total_stock,
+                   COALESCE(stock.total_boxes, 0) as total_boxes
             FROM materials m
             LEFT JOIN units u ON m.default_unit = u.unit_id
             LEFT JOIN locations l ON m.location_id = l.location_id
             LEFT JOIN material_names mn ON m.material_id = mn.material_id 
                 AND mn.language_code = 'th' AND mn.is_primary = 1
+            LEFT JOIN (
+                SELECT material_id, 
+                       SUM(pack_size) as total_stock,
+                       COUNT(*) as total_boxes
+                FROM material_stock_lots 
+                WHERE status = 'AVAILABLE'
+                GROUP BY material_id
+            ) stock ON m.material_id = stock.material_id
         ";
         
         $whereClause = $filterHelper->buildWhereClause($baseQuery);
@@ -599,5 +609,122 @@ class Material extends Model
         $receiptData['qr_codes'] = $qrCodes;
         
         return $receiptData;
+    }
+
+    public function getStockLots(int $page = 1, int $perPage = 20): array
+    {
+        $offset = ($page - 1) * $perPage;
+        
+        $sql = "
+            SELECT msl.*, m.material_code, mn.name as material_name, l.location_name,
+                   mri.created_at
+            FROM material_stock_lots msl
+            LEFT JOIN materials m ON msl.material_id = m.material_id
+            LEFT JOIN material_names mn ON m.material_id = mn.material_id 
+                AND mn.language_code = 'th' AND mn.is_primary = 1
+            LEFT JOIN locations l ON msl.location_id = l.location_id
+            LEFT JOIN material_receipt_items mri ON msl.receipt_item_id = mri.id
+            ORDER BY msl.created_at DESC
+            LIMIT ? OFFSET ?
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$perPage, $offset]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getTotalStockLots(): int
+    {
+        $sql = "SELECT COUNT(*) as total FROM material_stock_lots";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)($result['total'] ?? 0);
+    }
+    
+    public function getStockStats(): array
+    {
+        $sql = "
+            SELECT 
+                SUM(pack_size) as total_stock,
+                COUNT(*) as total_boxes,
+                SUM(CASE WHEN status = 'AVAILABLE' THEN pack_size ELSE 0 END) as available_stock,
+                COUNT(DISTINCT material_id) as materials_with_stock
+            FROM material_stock_lots
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return [
+            'totalStock' => (int)($result['total_stock'] ?? 0),
+            'totalBoxes' => (int)($result['total_boxes'] ?? 0),
+            'availableStock' => (int)($result['available_stock'] ?? 0),
+            'materialsWithStock' => (int)($result['materials_with_stock'] ?? 0)
+        ];
+    }
+
+    public function getStockDetailByQR(string $qrCode): ?array
+    {
+        $sql = "
+            SELECT msl.*, m.material_code, mn.name as material_name, l.location_name,
+                   mr.supplier_name, mr.receipt_date, mri.created_at
+            FROM material_stock_lots msl
+            LEFT JOIN materials m ON msl.material_id = m.material_id
+            LEFT JOIN material_names mn ON m.material_id = mn.material_id 
+                AND mn.language_code = 'th' AND mn.is_primary = 1
+            LEFT JOIN locations l ON msl.location_id = l.location_id
+            LEFT JOIN material_receipt_items mri ON msl.receipt_item_id = mri.id
+            LEFT JOIN material_receipts mr ON mri.receipt_id = mr.id
+            WHERE msl.qr_code = ?
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$qrCode]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $result ?: null;
+    }
+
+    public function getMaterialStockSummary(): array
+    {
+        $sql = "
+            SELECT m.material_code, mn.name as material_name, l.location_name,
+                   COUNT(msl.id) as total_boxes,
+                   SUM(msl.pack_size) as total_stock
+            FROM materials m
+            LEFT JOIN material_names mn ON m.material_id = mn.material_id 
+                AND mn.language_code = 'th' AND mn.is_primary = 1
+            LEFT JOIN locations l ON m.location_id = l.location_id
+            LEFT JOIN material_stock_lots msl ON m.material_id = msl.material_id
+            WHERE msl.id IS NOT NULL
+            GROUP BY m.material_id, m.material_code, mn.name, l.location_name
+            ORDER BY m.material_code
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getStockLotsByMaterial(string $materialCode): array
+    {
+        $sql = "
+            SELECT msl.*, m.material_code, mn.name as material_name, l.location_name,
+                   mri.created_at
+            FROM material_stock_lots msl
+            LEFT JOIN materials m ON msl.material_id = m.material_id
+            LEFT JOIN material_names mn ON m.material_id = mn.material_id 
+                AND mn.language_code = 'th' AND mn.is_primary = 1
+            LEFT JOIN locations l ON msl.location_id = l.location_id
+            LEFT JOIN material_receipt_items mri ON msl.receipt_item_id = mri.id
+            WHERE m.material_code = ?
+            ORDER BY msl.created_at DESC
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$materialCode]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
